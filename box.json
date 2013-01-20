@@ -1,0 +1,17 @@
+{
+    "alias": "twig-lint.phar",
+    "chmod": "0755",
+    "directories": ["src"],
+    "files": ["LICENSE"],
+    "finder": [
+        {
+            "name": "*.php",
+            "exclude": ["Tests", "Test"],
+            "in": "vendor"
+        }
+    ],
+    "git-version": "package_version",
+    "main": "bin/twig-lint",
+    "output": "twig-lint.phar",
+    "stub": true
+}
