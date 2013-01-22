@@ -5,6 +5,8 @@ twig-lint is a lint tool for your twig files.
 
 It can be useful to integrate in your ci setup or as the basis of editor plugins (e.g. [syntastic](https://github.com/scrooloose/syntastic) for Vim).
 
+[![Build Status](https://secure.travis-ci.org/asm89/twig-lint.png?branch=master)](http://travis-ci.org/asm89/twig-lint)
+
 Installation / Usage
 --------------------
 
