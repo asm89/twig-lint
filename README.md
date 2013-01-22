@@ -8,7 +8,7 @@ It can be useful to integrate in your ci setup or as the basis of editor plugins
 Installation / Usage
 --------------------
 
-1. Download the [`twig-lint.phar`](http://asm89.github.com/d/twig.phar) executable. Or require the package in your `composer.json`:
+1. Download the [`twig-lint.phar`](http://asm89.github.com/d/twig-lint.phar) executable. Or require the package in your `composer.json`:
 
     ``` json
     {
