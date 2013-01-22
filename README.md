@@ -23,7 +23,7 @@ Installation / Usage
 Authors
 -------
 
-Alexander <iam.asm89@gmail.com>
+Alexander <iam.asm89@gmail.com><br />
 Marc Weistroff <marc.weistroff@sensiolabs.com> (creator of the original `twig:lint` command in the symfony framework)
 
 License
