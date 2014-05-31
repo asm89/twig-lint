@@ -10,17 +10,29 @@ It can be useful to integrate in your ci setup or as the basis of editor plugins
 Installation / Usage
 --------------------
 
-1. Download the [`twig-lint.phar`](http://asm89.github.com/d/twig-lint.phar) executable. Or require the package in your `composer.json`:
+### As standalone executable
+
+Download the [`twig-lint.phar`](https://asm89.github.io/d/twig-lint.phar) executable. Or as a global composer dependency:
+
+```
+composer global require "asm89/twig-lint" "@stable"
+```
+
+Run `php twig-lint.phar lint <file>` or `~/.composer/vendor/bin/twig-lint lint <file>`.
+
+### As a dev dependency
+
+Add the following to your `composer.json`:
 
     ``` json
     {
-        "require": {
+        "require-dev": {
             "asm89/twig-lint": "*"
         }
     }
     ```
 
-2. Run `php twig-lint.phar lint <file>`
+Run `./bin/twig-lint lint <file>`.
 
 Authors
 -------
