@@ -14,7 +14,7 @@ Installation / Usage
 
 Download the [`twig-lint.phar`](https://asm89.github.io/d/twig-lint.phar) executable. Or as a global composer dependency:
 
-```
+```bash
 composer global require "asm89/twig-lint" "@stable"
 ```
 
@@ -24,13 +24,13 @@ Run `php twig-lint.phar lint <file>` or `~/.composer/vendor/bin/twig-lint lint <
 
 Add the following to your `composer.json`:
 
-    ``` json
-    {
-        "require-dev": {
-            "asm89/twig-lint": "*"
-        }
+```json
+{
+    "require-dev": {
+        "asm89/twig-lint": "*"
     }
-    ```
+}
+```
 
 Run `./bin/twig-lint lint <file>`.
 
