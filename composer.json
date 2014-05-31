@@ -12,7 +12,7 @@
         }
     ],
     "require": {
-        "symfony/console": "~2.1@dev",
+        "symfony/console": "~2.1",
         "symfony/finder": "~2.1",
         "twig/twig": "~1.12"
     },
