@@ -14,7 +14,7 @@
     "require": {
         "symfony/console": "~2.1",
         "symfony/finder": "~2.1",
-        "twig/twig": "~1.12"
+        "twig/twig": ">=1.16.2,<2.0"
     },
     "autoload": {
         "psr-0": { "Asm89\\Twig\\Lint\\": "src/" }

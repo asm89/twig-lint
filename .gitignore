@@ -1,4 +1,5 @@
 box.phar
 composer.phar
+composer.lock
 twig-lint.phar
 vendor

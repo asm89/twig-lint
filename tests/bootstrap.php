@@ -9,6 +9,8 @@
  * file that was distributed with this source code.
  */
 
+error_reporting(E_ALL | E_STRICT);
+
 if (file_exists($file = __DIR__.'/../vendor/autoload.php')) {
     $autoload = require_once $file;
 } else {
