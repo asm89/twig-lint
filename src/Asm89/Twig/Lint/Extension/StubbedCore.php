@@ -27,7 +27,7 @@ class StubbedCore extends \Twig_Extension_Core
      *
      * @return string
      */
-    protected function getTestNodeClass(\Twig_Parser $parser, $name, $line)
+    protected function getTestNodeClass(\Twig_Parser $parser, $name)
     {
         return 'Twig_Node_Expression_Test';
     }
