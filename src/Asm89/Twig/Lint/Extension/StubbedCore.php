@@ -31,4 +31,13 @@ class StubbedCore extends \Twig_Extension_Core
     {
         return 'Twig_Node_Expression_Test';
     }
+
+    protected function getTestName(\Twig_Parser $parser, $line)
+    {
+        try {
+            return parent::getTestName($parser, $line);
+        } catch (\Twig_Error_Syntax $exception) {
+            return 'null';
+        }
+    }
 }
