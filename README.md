@@ -34,6 +34,18 @@ Add the following to your `composer.json`:
 
 Run `./bin/twig-lint lint <file>`.
 
+### Vim and Syntastic configuration
+
+For the standalone executable, add the following to your `~/.vimrc` file:
+
+```
+let g:syntastic_twig_twiglint_exec = 'php'
+let g:syntastic_twig_twiglint_exe = 'php /path/to/twig-lint.phar'
+```
+
+For the composer dependency, twig-lint must be in your `$PATH`, no further
+configuration is needed.
+
 Authors
 -------
 
