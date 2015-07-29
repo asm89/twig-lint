@@ -43,4 +43,5 @@ Marc Weistroff <marc.weistroff@sensiolabs.com> (creator of the original `twig:li
 License
 -------
 
-twig-lint is licensed under the MIT License - see the LICENSE file for details
+- twig-lint is licensed under the MIT License - see the LICENSE file for details
+- I am providing code in this repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not from my employer (Facebook).
