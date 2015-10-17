@@ -105,7 +105,7 @@ EOF
 
         $errors = 0;
         foreach ($files as $file) {
-            if (true === $this->fileInExcludeList($file, $excludeList)) {
+            if (true === $this->isFileInExcludeList($file, $excludeList)) {
                 $output->skip($template, $file);
                 continue;
             }
@@ -148,7 +148,7 @@ EOF
      * @param array $excludeList Array of regexes that should be excluded
      * @return bool True if the file is in the exclude list
      */
-    protected function fileInExcludeList($file, array $excludeList)
+    protected function isFileInExcludeList($file, array $excludeList)
     {
         foreach ($excludeList as $exclude) {
             if (1 === preg_match('/' . $exclude . '/', $file)) {
