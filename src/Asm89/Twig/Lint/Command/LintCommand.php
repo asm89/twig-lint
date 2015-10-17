@@ -36,7 +36,10 @@ class LintCommand extends Command
         $this
             ->setName('lint')
             ->setDescription('Lints a template and outputs encountered errors')
-            ->setDefinition(array(new InputOption('format', '', InputOption::VALUE_OPTIONAL, "full, csv", "full")))
+            ->setDefinition(array(
+                new InputOption('format', '', InputOption::VALUE_OPTIONAL, "full, csv", "full"),
+                new InputOption('summary', '', InputOption::VALUE_NONE)
+            ))
             ->addArgument('filename')
             ->setHelp(<<<EOF
 The <info>%command.name%</info> command lints a template and outputs to stdout
@@ -64,6 +67,7 @@ EOF
         $twig     = new StubbedEnvironment(new \Twig_Loader_String());
         $template = null;
         $filename = $input->getArgument('filename');
+        $summary = $input->getOption('summary');
         $output   = $this->getOutput($output, $input->getOption('format'));
 
         if (!$filename) {
@@ -90,8 +94,20 @@ EOF
         }
 
         $errors = 0;
+        $linted = 0;
         foreach ($files as $file) {
+            $linted++;
             $errors += $this->validateTemplate($twig, $output, file_get_contents($file), $file);
+        }
+
+        $stats = array(
+            'total' => count($files),
+            'linted' => $linted,
+            'errors' => $errors,
+        );
+
+        if ($summary) {
+            $output->summary($stats);
         }
 
         return $errors > 0 ? 1 : 0;

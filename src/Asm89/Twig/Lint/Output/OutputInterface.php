@@ -32,4 +32,9 @@ interface OutputInterface
      * @param string     $file
      */
     public function error($template, Twig_Error $error, $file = null);
+
+    /**
+     * @param array $stats Array with statistics about the linting run
+     */
+    public function summary(array $stats);
 }
