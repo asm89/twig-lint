@@ -69,6 +69,14 @@ class FullOutput implements OutputInterface
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function skip($template, $file = null)
+    {
+        $this->output->writeln('<info>SKIP</info>'.($file ? sprintf(' in %s', $file) : ''));
+    }
+
     protected function getContext($template, $line, $context = 3)
     {
         $lines = explode("\n", $template);

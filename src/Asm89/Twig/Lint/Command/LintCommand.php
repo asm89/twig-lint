@@ -36,8 +36,11 @@ class LintCommand extends Command
         $this
             ->setName('lint')
             ->setDescription('Lints a template and outputs encountered errors')
-            ->setDefinition(array(new InputOption('format', '', InputOption::VALUE_OPTIONAL, "full, csv", "full")))
+            ->setDefinition(array(
+                new InputOption('format', '', InputOption::VALUE_OPTIONAL, "full, csv", "full"))
+            )
             ->addArgument('filename')
+            ->addOption('exclude', '', InputOption::VALUE_REQUIRED, 'comma-separated string: excludes paths of files and folders from parsing')
             ->setHelp(<<<EOF
 The <info>%command.name%</info> command lints a template and outputs to stdout
 the first encountered syntax error.
@@ -54,6 +57,10 @@ of each Twig template.
 <info>cat filename | php %command.full_name%</info>
 
 The command gets the template contents from stdin and validates its syntax.
+
+<info>php %command.full_name% filename --exclude=path/to/dir,path/.*/file\.twig,some_folder/file</info>
+
+The command excludes the files that match the exclusion (regex) and lists them as skipped.
 EOF
             )
         ;
@@ -64,6 +71,7 @@ EOF
         $twig     = new StubbedEnvironment(new \Twig_Loader_String());
         $template = null;
         $filename = $input->getArgument('filename');
+        $exclude  = $input->getOption('exclude');
         $output   = $this->getOutput($output, $input->getOption('format'));
 
         if (!$filename) {
@@ -82,6 +90,12 @@ EOF
             throw new \RuntimeException(sprintf('File or directory "%s" is not readable', $filename));
         }
 
+        if ($exclude) {
+            $excludeList = explode(',', $exclude);
+        } else {
+            $excludeList = array();
+        }
+
         $files = array();
         if (is_file($filename)) {
             $files = array($filename);
@@ -91,6 +105,10 @@ EOF
 
         $errors = 0;
         foreach ($files as $file) {
+            if (true === $this->fileInExcludeList($file, $excludeList)) {
+                $output->skip($template, $file);
+                continue;
+            }
             $errors += $this->validateTemplate($twig, $output, file_get_contents($file), $file);
         }
 
@@ -121,7 +139,22 @@ EOF
                 return new FullOutput($output);
                 break;
             default:
-                throw new RuntimeException(sprintf("Unknown output format '%s'.", $format));
+                throw new \RuntimeException(sprintf("Unknown output format '%s'.", $format));
         }
+    }
+
+    /**
+     * @param $file string Filename including path
+     * @param array $excludeList Array of regexes that should be excluded
+     * @return bool True if the file is in the exclude list
+     */
+    protected function fileInExcludeList($file, array $excludeList)
+    {
+        foreach ($excludeList as $exclude) {
+            if (1 === preg_match('/' . $exclude . '/', $file)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

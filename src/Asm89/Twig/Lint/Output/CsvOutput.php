@@ -47,4 +47,12 @@ class CsvOutput implements OutputInterface
         $filename = ($file ? '"' . (string) $file . '",' : '');
         $this->output->writeln($filename . $exception->getTemplateLine() . ',' . $exception->getRawMessage());
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function skip($template, $file = null)
+    {
+        $this->output->writeln(($file ? '"' . (string) $file . '",' : '') . ',skip');
+    }
 }
