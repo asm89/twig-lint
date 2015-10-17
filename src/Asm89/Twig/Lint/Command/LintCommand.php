@@ -37,10 +37,10 @@ class LintCommand extends Command
             ->setName('lint')
             ->setDescription('Lints a template and outputs encountered errors')
             ->setDefinition(array(
-                new InputOption('format', '', InputOption::VALUE_OPTIONAL, "full, csv", "full"))
-            )
+                new InputOption('format', '', InputOption::VALUE_OPTIONAL, "full, csv", "full"),
+                new InputOption('exclude', '', InputOption::VALUE_REQUIRED, 'comma-separated string: excludes paths of files and folders from parsing')
+            ))
             ->addArgument('filename')
-            ->addOption('exclude', '', InputOption::VALUE_REQUIRED, 'comma-separated string: excludes paths of files and folders from parsing')
             ->setHelp(<<<EOF
 The <info>%command.name%</info> command lints a template and outputs to stdout
 the first encountered syntax error.
