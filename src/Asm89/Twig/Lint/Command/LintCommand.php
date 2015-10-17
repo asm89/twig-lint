@@ -36,7 +36,10 @@ class LintCommand extends Command
         $this
             ->setName('lint')
             ->setDescription('Lints a template and outputs encountered errors')
-            ->setDefinition(array(new InputOption('format', '', InputOption::VALUE_OPTIONAL, "full, csv", "full")))
+            ->setDefinition(array(
+                new InputOption('format', '', InputOption::VALUE_OPTIONAL, "full, csv", "full"),
+                new InputOption('only-print-errors', '', InputOption::VALUE_NONE)
+            ))
             ->addArgument('filename')
             ->setHelp(<<<EOF
 The <info>%command.name%</info> command lints a template and outputs to stdout
@@ -61,10 +64,11 @@ EOF
 
     protected function execute(InputInterface $input, CliOutputInterface $output)
     {
-        $twig     = new StubbedEnvironment(new \Twig_Loader_String());
-        $template = null;
-        $filename = $input->getArgument('filename');
-        $output   = $this->getOutput($output, $input->getOption('format'));
+        $twig            = new StubbedEnvironment(new \Twig_Loader_String());
+        $template        = null;
+        $filename        = $input->getArgument('filename');
+        $onlyPrintErrors = $input->getOption('only-print-errors');
+        $output          = $this->getOutput($output, $input->getOption('format'));
 
         if (!$filename) {
             if (0 !== ftell(STDIN)) {
@@ -91,17 +95,25 @@ EOF
 
         $errors = 0;
         foreach ($files as $file) {
-            $errors += $this->validateTemplate($twig, $output, file_get_contents($file), $file);
+            $errors += $this->validateTemplate($twig, $output, file_get_contents($file), $file, $onlyPrintErrors);
         }
 
         return $errors > 0 ? 1 : 0;
     }
 
-    protected function validateTemplate(\Twig_Environment $twig, OutputInterface $output, $template, $file = null)
+    protected function validateTemplate(
+        \Twig_Environment $twig,
+        OutputInterface $output,
+        $template,
+        $file = null,
+        $onlyPrintErrors = false
+    )
     {
         try {
             $twig->parse($twig->tokenize($template, $file ? (string) $file : null));
-            $output->ok($template, $file);
+            if (false === $onlyPrintErrors) {
+                $output->ok($template, $file);
+            }
         } catch (\Twig_Error $e) {
             $output->error($template, $e, $file);
 
