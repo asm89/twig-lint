@@ -24,6 +24,7 @@ class StubbedEnvironment extends \Twig_Environment
 {
     private $stubFilters;
     private $stubFunctions;
+    private $stubTests;
     protected $parsers;
 
     /**
@@ -62,5 +63,17 @@ class StubbedEnvironment extends \Twig_Environment
         }
 
         return $this->stubFunctions[$name];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getTest($name)
+    {
+        if (!isset($this->stubTests[$name])) {
+            $this->stubTests[$name] = new \Twig_SimpleTest('stub', function(){});
+        }
+
+        return $this->stubTests[$name];
     }
 }
