@@ -32,10 +32,4 @@ interface OutputInterface
      * @param string     $file
      */
     public function error($template, Twig_Error $error, $file = null);
-
-    /**
-     * @param string     $template
-     * @param string     $file
-     */
-    public function skip($template, $file = null);
 }
