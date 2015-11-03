@@ -48,17 +48,12 @@ class StubbedEnvironment extends \Twig_Environment
     {
         $tokens = array();
 
-        $exceptions = array_filter($this->tests, function ($key) {
-            if (strpos($key, ' ') > 0) {
-                return true;
-            } else {
-                return false;
+        foreach ($this->tests as $test) {
+            $name = $test->getName();
+            if (strpos($name, ' ') > 0) {
+                $parts = explode(' ', $name);
+                $tokens[] = $parts[0];
             }
-        }, ARRAY_FILTER_USE_KEY);
-
-        foreach ($exceptions as $exception) {
-            $parts = explode(' ', $exception->getName());
-            $tokens[] = $parts[0];
         }
 
         return $tokens;
