@@ -64,6 +64,7 @@ class StubbedEnvironmentTest extends \PHPUnit_Framework_TestCase
             array('trans_tag.twig'),
             array('multiple_trans_tags.twig'),
             array('undefined_test.twig'),
+            array('official_test.twig'),
             array('undefined_functions.twig'),
             array('mixed.twig'),
         );
