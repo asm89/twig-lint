@@ -36,7 +36,21 @@ class LintCommand extends Command
         $this
             ->setName('lint')
             ->setDescription('Lints a template and outputs encountered errors')
-            ->setDefinition(array(new InputOption('format', '', InputOption::VALUE_OPTIONAL, "full, csv", "full")))
+            ->setDefinition(array(
+                new InputOption(
+                    'format',
+                    '',
+                    InputOption::VALUE_OPTIONAL,
+                    'full, csv',
+                    'full'
+                ),
+                new InputOption(
+                    'exclude',
+                    '',
+                    InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+                    'Excludes, based on regex, paths of files and folders from parsing'
+                )
+            ))
             ->addArgument('filename')
             ->setHelp(<<<EOF
 The <info>%command.name%</info> command lints a template and outputs to stdout
@@ -54,6 +68,10 @@ of each Twig template.
 <info>cat filename | php %command.full_name%</info>
 
 The command gets the template contents from stdin and validates its syntax.
+
+<info>php %command.full_name% filename --exclude path/to/dir --exclude path/.*/file\.twig --exclude some_folder/file</info>
+
+The command excludes the files that match the exclusion (regex) and lists them as skipped.
 EOF
             )
         ;
@@ -64,6 +82,7 @@ EOF
         $twig     = new StubbedEnvironment(new \Twig_Loader_String());
         $template = null;
         $filename = $input->getArgument('filename');
+        $exclude  = $input->getOption('exclude');
         $output   = $this->getOutput($output, $input->getOption('format'));
 
         if (!$filename) {
@@ -86,7 +105,17 @@ EOF
         if (is_file($filename)) {
             $files = array($filename);
         } elseif (is_dir($filename)) {
-            $files = Finder::create()->files()->in($filename)->name('*.twig');
+            $files = Finder::create()->files()->in($filename)->name('*.twig')->filter(
+                // pass in the list of excludes
+                function (\SplFileInfo $file) use ($exclude) {
+                    foreach ($exclude as $excludeItem) {
+                        if (1 === preg_match('#' . $excludeItem . '#', $file->getRealPath())) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            );
         }
 
         $errors = 0;
@@ -121,7 +150,7 @@ EOF
                 return new FullOutput($output);
                 break;
             default:
-                throw new RuntimeException(sprintf("Unknown output format '%s'.", $format));
+                throw new \RuntimeException(sprintf("Unknown output format '%s'.", $format));
         }
     }
 }
