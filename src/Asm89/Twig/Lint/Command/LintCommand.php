@@ -49,7 +49,8 @@ class LintCommand extends Command
                     '',
                     InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
                     'Excludes, based on regex, paths of files and folders from parsing'
-                )
+                ),
+                new InputOption('only-print-errors', '', InputOption::VALUE_NONE)
             ))
             ->addArgument('filename')
             ->setHelp(<<<EOF
@@ -118,19 +119,28 @@ EOF
             );
         }
 
+        $onlyPrintErrors = $input->getOption('only-print-errors');
         $errors = 0;
         foreach ($files as $file) {
-            $errors += $this->validateTemplate($twig, $output, file_get_contents($file), $file);
+            $errors += $this->validateTemplate($twig, $output, file_get_contents($file), $file, $onlyPrintErrors);
         }
 
         return $errors > 0 ? 1 : 0;
     }
 
-    protected function validateTemplate(\Twig_Environment $twig, OutputInterface $output, $template, $file = null)
+    protected function validateTemplate(
+        \Twig_Environment $twig,
+        OutputInterface $output,
+        $template,
+        $file = null,
+        $onlyPrintErrors = false
+    )
     {
         try {
             $twig->parse($twig->tokenize($template, $file ? (string) $file : null));
-            $output->ok($template, $file);
+            if (false === $onlyPrintErrors) {
+                $output->ok($template, $file);
+            }
         } catch (\Twig_Error $e) {
             $output->error($template, $e, $file);
 
