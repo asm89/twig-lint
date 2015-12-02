@@ -84,4 +84,14 @@ class FullOutput implements OutputInterface
 
         return $result;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function summary(array $stats)
+    {
+        $summary = 'Total files: %d, files linted: %d, files with errors: %d';
+        $summary = sprintf($summary, $stats['total'], $stats['linted'], $stats['errors']);
+        $this->output->writeln($summary);
+    }
 }

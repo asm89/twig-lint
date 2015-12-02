@@ -50,7 +50,8 @@ class LintCommand extends Command
                     InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
                     'Excludes, based on regex, paths of files and folders from parsing'
                 ),
-                new InputOption('only-print-errors', '', InputOption::VALUE_NONE)
+                new InputOption('only-print-errors', '', InputOption::VALUE_NONE),
+                new InputOption('summary', '', InputOption::VALUE_NONE)
             ))
             ->addArgument('filename')
             ->setHelp(<<<EOF
@@ -84,6 +85,7 @@ EOF
         $template = null;
         $filename = $input->getArgument('filename');
         $exclude  = $input->getOption('exclude');
+        $summary  = $input->getOption('summary');
         $output   = $this->getOutput($output, $input->getOption('format'));
 
         if (!$filename) {
@@ -121,8 +123,20 @@ EOF
 
         $onlyPrintErrors = $input->getOption('only-print-errors');
         $errors = 0;
+        $linted = 0;
         foreach ($files as $file) {
+            $linted++;
             $errors += $this->validateTemplate($twig, $output, file_get_contents($file), $file, $onlyPrintErrors);
+        }
+
+        $stats = array(
+            'total' => count($files),
+            'linted' => $linted,
+            'errors' => $errors,
+        );
+
+        if ($summary) {
+            $output->summary($stats);
         }
 
         return $errors > 0 ? 1 : 0;
