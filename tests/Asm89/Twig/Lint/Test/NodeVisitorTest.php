@@ -20,7 +20,7 @@ class NodeVisitorTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider templateFixtures
      */
-    public function testVisitor($filename, $expect)
+    public function testVisitor($filename, $expects)
     {
         $file     = __DIR__ . '/Fixtures/' . $filename;
         $template = file_get_contents($file);
@@ -28,24 +28,29 @@ class NodeVisitorTest extends \PHPUnit_Framework_TestCase
         $sniffExtension = $this->env->getExtension('Asm89\Twig\Lint\Extension\SniffsExtension');
         $sniffExtension->addSniff(new TranslationSniff());
 
-        try {
-            $this->env->parse($this->env->tokenize($template, $file));
-        } catch (\Twig_Error $e) {
-
-            return 1;
-        }
+        $this->env->parse($this->env->tokenize($template, $file));
 
         $messages = $sniffExtension->getMessages();
+        $messageStrings = array_map(function ($message) {
+            return $message[1];
+        }, $messages);
 
-        $this->assertCount(1, $messages);
-        $this->assertEquals($messages[0][1], $expect);
+        $this->assertFalse(empty($messages));
+        foreach ($expects as $expect) {
+            $this->assertContains($expect, $messageStrings);
+        }
+
     }
 
     public function templateFixtures()
     {
         return [
-            ['Translation/lint_sniff_trans.twig', 'Missing lang parameter in trans() filter call'],
-            ['Translation/lint_sniff_transchoice.twig', 'Missing lang parameter in transchoice() filter call'],
+            ['Translation/lint_sniff_trans_no.twig', [
+                'Missing lang parameter in trans() filter call',
+                'Missing domain parameter in trans() filter call'
+            ]],
+            ['Translation/lint_sniff_trans.twig', ['Missing lang parameter in trans() filter call']],
+            ['Translation/lint_sniff_transchoice.twig', ['Missing lang parameter in transchoice() filter call']],
         ];
     }
 }

@@ -12,12 +12,20 @@ class TranslationSniff extends AbstractSniff
     public function process(\Twig_Node $node, \Twig_Environment $env)
     {
         if ($this->isNodeMatching($node, 'filter', 'trans')) {
+            $this->sniffTransMissingDomain($node);
             $this->sniffTransMissingLang($node);
         } elseif ($this->isNodeMatching($node, 'filter', 'transchoice')) {
             $this->sniffTranschoiceMissingLang($node);
         }
 
         return $node;
+    }
+
+    public function sniffTransMissingDomain($node)
+    {
+        if (count($node->getNode('arguments')) < 2) {
+            $this->addMessage($this::MESSAGE_TYPE_WARNING, 'Missing domain parameter in trans() filter call', $node->getLine(), 0);
+        }
     }
 
     public function sniffTransMissingLang($node)

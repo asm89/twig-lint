@@ -4,6 +4,11 @@ namespace Asm89\Twig\Lint\Sniffs;
 
 abstract class AbstractSniff implements SniffInterface
 {
+    public function __construct()
+    {
+        $this->messages = [];
+    }
+
     public function addMessage($messageType, $message, $line, $severity)
     {
         $this->messages[] = [
@@ -33,7 +38,6 @@ abstract class AbstractSniff implements SniffInterface
     }
 
     public function stringifyNode($node) {
-        // dump($node);
         $stringValue = '';
 
         if ($node instanceof \Twig_Node_Expression_GetAttr) {
