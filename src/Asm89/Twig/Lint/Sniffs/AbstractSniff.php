@@ -2,61 +2,8 @@
 
 namespace Asm89\Twig\Lint\Sniffs;
 
-abstract class AbstractSniff extends \Twig_BaseNodeVisitor implements SniffInterface
+abstract class AbstractSniff implements SniffInterface
 {
-    protected $enabled;
-
-    protected $messages;
-
-    public function __construct($enabled = false)
-    {
-        $this->enabled = $enabled;
-        $this->messages = [];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function doEnterNode(\Twig_Node $node, \Twig_Environment $env)
-    {
-        if (!$this->enabled) {
-            return $node;
-        }
-
-        return $this->process($node, $env);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function doLeaveNode(\Twig_Node $node, \Twig_Environment $env)
-    {
-        return $node;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPriority()
-    {
-        return 0;
-    }
-
-    abstract public function process(\Twig_Node $node, \Twig_Environment $env);
-
-    public function enable()
-    {
-        $this->enabled = true;
-        $this->messages = array();
-    }
-
-    public function disable()
-    {
-        $this->enabled = false;
-        $this->messages = array();
-    }
-
-
     public function addMessage($messageType, $message, $line, $severity)
     {
         $this->messages[] = [

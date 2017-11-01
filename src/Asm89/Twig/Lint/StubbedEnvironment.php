@@ -11,6 +11,7 @@
 
 namespace Asm89\Twig\Lint;
 
+use Asm89\Twig\Lint\Extension\SniffsExtension;
 use Asm89\Twig\Lint\Extension\StubbedCore;
 use Twig_LoaderInterface;
 
@@ -35,6 +36,7 @@ class StubbedEnvironment extends \Twig_Environment
         parent::__construct($loader, $options);
 
         $this->addExtension(new StubbedCore());
+        $this->addExtension(new SniffsExtension());
         $this->initExtensions();
 
         $broker = new StubbedTokenParserBroker();
