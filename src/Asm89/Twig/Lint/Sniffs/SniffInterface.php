@@ -1,0 +1,16 @@
+<?php
+
+namespace Asm89\Twig\Lint\Sniffs;
+
+interface SniffInterface
+{
+    const MESSAGE_TYPE_ALL       = 0;
+    const MESSAGE_TYPE_WARNING   = 1;
+    const MESSAGE_TYPE_ERROR     = 2;
+
+    public function process(\Twig_Node $node, \Twig_Environment $env);
+
+    public function addMessage($messageType, $message, $line, $severity);
+
+    public function getMessages($messageType = null);
+}

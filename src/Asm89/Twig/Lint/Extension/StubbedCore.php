@@ -11,6 +11,8 @@
 
 namespace Asm89\Twig\Lint\Extension;
 
+use Asm89\Twig\Lint\Sniffs\TwigNodeVisitor;
+
 /**
  * Overridden core extension to stub tests.
  *
@@ -18,6 +20,22 @@ namespace Asm89\Twig\Lint\Extension;
  */
 class StubbedCore extends \Twig_Extension_Core
 {
+    protected $nodeVisitor;
+
+    public function getNodeVisitors()
+    {
+        return [$this->getSnifferNodeVisitor()];
+    }
+
+    public function getSnifferNodeVisitor()
+    {
+        if (!$this->nodeVisitor) {
+            $this->nodeVisitor = new TwigNodeVisitor();
+        }
+
+        return $this->nodeVisitor;
+    }
+
     /**
      * Return a class name for every test name.
      *
