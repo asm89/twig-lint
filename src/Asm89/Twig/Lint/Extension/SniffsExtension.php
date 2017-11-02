@@ -24,6 +24,8 @@ class SniffsExtension extends \Twig_Extension_Core
     public function addSniff($sniff)
     {
         $this->nodeVisitor->addSniff($sniff);
+
+        return $this;
     }
 
     public function getMessages()

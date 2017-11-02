@@ -8,6 +8,8 @@ interface SniffInterface
     const MESSAGE_TYPE_WARNING   = 1;
     const MESSAGE_TYPE_ERROR     = 2;
 
+    const SEVERITY_DEFAULT = 5;
+
     public function process(\Twig_Node $node, \Twig_Environment $env);
 
     public function addMessage($messageType, $message, $line, $severity);

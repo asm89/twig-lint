@@ -9,8 +9,12 @@ abstract class AbstractSniff implements SniffInterface
         $this->messages = [];
     }
 
-    public function addMessage($messageType, $message, $line, $severity)
+    public function addMessage($messageType, $message, $line, $severity = null)
     {
+        if (!$severity) {
+            $severity = $this::SEVERITY_DEFAULT;
+        }
+
         $this->messages[] = [
             $messageType,
             $message,
@@ -29,12 +33,31 @@ abstract class AbstractSniff implements SniffInterface
     public function isNodeMatching($node, $type, $name = null)
     {
         $typeToClass = [
-            'filter' => function ($node) {
-                return $node instanceof \Twig_Node_Expression_Filter;
+            'filter' => function ($node) use ($type, $name) {
+                return $node instanceof \Twig_Node_Expression_Filter && $name === $node->getNode($type)->getAttribute('value');
+            },
+            'function' => function ($node) use ($type, $name) {
+                return $node instanceof \Twig_Node_Expression_Function && $name === $node->getAttribute('name');
+            },
+            'include' => function ($node) {
+                return $node instanceof \Twig_Node_Include;
             },
         ];
 
-        return $typeToClass[$type]($node) && $name === $node->getNode($type)->getAttribute('value');
+        return $typeToClass[$type]($node);
+    }
+
+    public function stringifyValue($value)
+    {
+        if (null === $value) {
+            return 'null';
+        }
+
+        if (is_bool($value)) {
+            return ($value) ? 'true': 'false';
+        }
+
+        return (string) $value;
     }
 
     public function stringifyNode($node) {

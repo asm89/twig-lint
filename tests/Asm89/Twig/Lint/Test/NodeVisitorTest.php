@@ -3,7 +3,6 @@
 namespace Asm89\Twig\Lint\Test;
 
 use Asm89\Twig\Lint\StubbedEnvironment;
-use Asm89\Twig\Lint\Standards\Generic\Sniffs\TranslationSniff;
 use Twig_Error;
 
 class NodeVisitorTest extends \PHPUnit_Framework_TestCase
@@ -20,13 +19,22 @@ class NodeVisitorTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider templateFixtures
      */
-    public function testVisitor($filename, $expects)
+    public function testVisitor($isFile, $filename, $expects)
     {
-        $file     = __DIR__ . '/Fixtures/' . $filename;
-        $template = file_get_contents($file);
+        if ($isFile) {
+            $file     = __DIR__ . '/Fixtures/' . $filename;
+            $template = file_get_contents($file);
+        } else {
+            $file = null;
+            $template = $filename;
+        }
 
         $sniffExtension = $this->env->getExtension('Asm89\Twig\Lint\Extension\SniffsExtension');
-        $sniffExtension->addSniff(new TranslationSniff());
+        $sniffExtension
+            ->addSniff(new \Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff())
+            ->addSniff(new \Asm89\Twig\Lint\Standards\Generic\Sniffs\TranslationSniff())
+            ->addSniff(new \Asm89\Twig\Lint\Standards\Generic\Sniffs\DumpSniff())
+        ;
 
         $this->env->parse($this->env->tokenize($template, $file));
 
@@ -34,23 +42,44 @@ class NodeVisitorTest extends \PHPUnit_Framework_TestCase
         $messageStrings = array_map(function ($message) {
             return $message[1];
         }, $messages);
+        dump($messages);
 
-        $this->assertFalse(empty($messages));
-        foreach ($expects as $expect) {
-            $this->assertContains($expect, $messageStrings);
+        $this->assertEquals(count($expects), count($messages));
+        if ($expects) {
+            foreach ($expects as $expect) {
+                $this->assertContains($expect, $messageStrings);
+            }
         }
-
     }
 
     public function templateFixtures()
     {
         return [
-            ['Translation/lint_sniff_trans_no.twig', [
+            [true, 'Dump/lint_sniff_dump_tag.twig', [
+                'Found {% dump %} tag',
+            ]],
+            [true, 'Dump/lint_sniff_dump_function.twig', [
+                'Found dump() function call',
+            ]],
+            [true, 'Include/lint_sniff_include_tag.twig', [
+                'Include tag is deprecated, prefer the include() function',
+                'Prefer to use template notation with "@" in include tag',
+            ]],
+            [true, 'Include/lint_sniff_include_function.twig', [
+                'Prefer to use template notation with "@" in include function call()',
+            ]],
+            [true, 'Include/lint_sniff_include_no.twig', [
+                'Missing template (first argument) in include function call()',
+                'Invalid template (first argument, found "") in include function call()',
+                'Invalid template (first argument, found "null") in include function call()',
+                'Invalid template (first argument, found "false") in include function call()',
+            ]],
+            [true, 'Translation/lint_sniff_trans_no.twig', [
                 'Missing lang parameter in trans() filter call',
                 'Missing domain parameter in trans() filter call'
             ]],
-            ['Translation/lint_sniff_trans.twig', ['Missing lang parameter in trans() filter call']],
-            ['Translation/lint_sniff_transchoice.twig', ['Missing lang parameter in transchoice() filter call']],
+            [true, 'Translation/lint_sniff_trans.twig', ['Missing lang parameter in trans() filter call']],
+            [true, 'Translation/lint_sniff_transchoice.twig', ['Missing lang parameter in transchoice() filter call']],
         ];
     }
 }
