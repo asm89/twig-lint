@@ -10,8 +10,6 @@ interface SniffInterface
 
     const SEVERITY_DEFAULT = 5;
 
-    public function process(\Twig_Node $node, \Twig_Environment $env);
-
     public function addMessage($messageType, $message, $line, $severity);
 
     public function getMessages($messageType = null);

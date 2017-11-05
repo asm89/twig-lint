@@ -2,6 +2,8 @@
 
 namespace Asm89\Twig\Lint\NodeVisitor;
 
+use Asm89\Twig\Lint\Sniffs\PostParserSniffInterface;
+
 class SniffsNodeVisitor extends \Twig_BaseNodeVisitor
 {
     protected $sniffs;
@@ -47,7 +49,7 @@ class SniffsNodeVisitor extends \Twig_BaseNodeVisitor
         return 0;
     }
 
-    public function addSniff($sniff)
+    public function addSniff(PostParserSniffInterface $sniff)
     {
         $this->sniffs[] = $sniff;
     }

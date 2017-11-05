@@ -4,7 +4,8 @@ namespace Asm89\Twig\Lint\Test;
 
 use Asm89\Twig\Lint\StubbedEnvironment;
 use Asm89\Twig\Lint\Preprocessor\Preprocessor;
-use Asm89\Twig\Lint\Preprocessor\TwigToken;
+use Asm89\Twig\Lint\Preprocessor\Token;
+use Asm89\Twig\Lint\Standards\Generic\Sniffs\WhitespaceBeforeAfterExpression;
 
 use \Twig_Environment;
 use \Twig_Error;
@@ -28,29 +29,30 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
         $template = file_get_contents($file);
 
         $preprocessor = new Preprocessor(new Twig_Environment($this->getMockBuilder('Twig_LoaderInterface')->getMock()));
-        // $x = $this->env->parse($this->env->tokenize($template, $file));
-        // dump($x);
         $stream = $preprocessor->tokenize($template);
 
-        while (!$stream->isEOF()) {
-            switch ($stream->getCurrent()->getType()) {
-                case TwigToken::VAR_START_TYPE:
-                    $next = $stream->next();
+        $sniff = new WhitespaceBeforeAfterExpression();
 
-                    if ($next->getType() !== TwigToken::WHITESPACE_TYPE) {
-                        // $messages[] = ['Missing whitespace at line']
-                    }
-
-                    break;
-            }
-            dump((string) $stream->next());
+        dump($stream);
+        foreach ($stream as $index => $token) {
+            $sniff->process($token, $index, $stream);
         }
 
-        // $stream->expect(Twig_Token::BLOCK_START_TYPE);
+        dump($sniff->getMessages());
 
-        // $this->assertSame('§', $stream->expect(Twig_Token::NAME_TYPE)->getValue());
+        // while (!$stream->isEOF()) {
+        //     switch ($stream->getCurrent()->getType()) {
+        //         case Token::VAR_START_TYPE:
+        //             $next = $stream->next();
 
-        // dump((string) $stream);
+        //             if ($next->getType() !== Token::WHITESPACE_TYPE) {
+        //                 // $messages[] = ['Missing whitespace at line']
+        //             }
+
+        //             break;
+        //     }
+        //     dump((string) $stream->next());
+        // }
     }
 
     public function templateFixtures()

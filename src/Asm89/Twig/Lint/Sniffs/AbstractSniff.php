@@ -2,7 +2,7 @@
 
 namespace Asm89\Twig\Lint\Sniffs;
 
-abstract class AbstractSniff implements SniffInterface
+abstract class AbstractSniff implements PostParserSniffInterface
 {
     public function __construct()
     {

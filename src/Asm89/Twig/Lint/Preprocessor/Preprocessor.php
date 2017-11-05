@@ -9,10 +9,12 @@ class Preprocessor
     const STATE_VAR         = 2;
     const STATE_COMMENT     = 3;
 
-    const STATE_NADA        = 69;
-    const STATE_STOP        = 70;
-    const STATE_TOKEN_START = 71;
-    const STATE_TOKEN_STOP  = 72;
+    const REGEX_NAME = '/[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/A';
+    const REGEX_NUMBER = '/[0-9]+(?:\.[0-9]+)?/A';
+    const REGEX_STRING = '/"([^#"\\\\]*(?:\\\\.[^#"\\\\]*)*)"|\'([^\'\\\\]*(?:\\\\.[^\'\\\\]*)*)\'/As';
+    const REGEX_DQ_STRING_DELIM = '/"/A';
+    const REGEX_DQ_STRING_PART = '/[^#"\\\\]*(?:(?:\\\\.|#(?!\{))[^#"\\\\]*)*/As';
+    const PUNCTUATION = '()[]{}?:.,|';
 
     protected $env;
 
@@ -38,7 +40,15 @@ class Preprocessor
         $this->regexes['lex_block'] = '/('.preg_quote($this->options['whitespace_trim']).')?('.preg_quote($this->options['tag_block'][1]).')/';
         $this->regexes['lex_variable'] = '/('.preg_quote($this->options['whitespace_trim']).')?('.preg_quote($this->options['tag_variable'][1]).')/';
         $this->regexes['lex_comment'] = '/('.preg_quote($this->options['whitespace_trim']).')?('.preg_quote($this->options['tag_comment'][1]).')/';
-        // dump($this->regexes);
+        $this->regexes['operator'] = $this->getOperatorRegex();
+    }
+
+    protected function resetState()
+    {
+        $this->cursor = 0;
+        $this->lineno = 1;
+        $this->currentPosition = 0;
+        $this->tokens = [];
     }
 
     protected function preflightSource($code)
@@ -60,14 +70,13 @@ class Preprocessor
 
     protected function moveCurrentPosition($value = 1)
     {
-        // dump(['currentPosition' => $this->currentPosition]);
         $this->currentPosition += $value;
     }
 
-    protected function moveCursor($value = 1)
+    protected function moveCursor($value)
     {
-        $this->cursor += $value;
-        // $this->lineno += substr_count($value, "\n");
+        $this->cursor += strlen($value);
+        $this->lineno += substr_count($value, "\n");
     }
 
     protected function getTokenPosition($tokenPosition = null)
@@ -89,10 +98,9 @@ class Preprocessor
         return $this->tokenPositions[$this->currentPosition];
     }
 
-    protected function pushToken($type, $lineno, $cusorPosition, $value = null)
+    protected function pushToken($type, $cusorPosition, $value = null)
     {
-        $this->lineno = $this->lineno + substr_count($value, "\n");
-        $this->tokens[] = [$type, $value, $this->lineno, $cusorPosition];
+        $this->tokens[] = new Token($type, $this->lineno, $value);
     }
 
     protected function getState()
@@ -116,39 +124,10 @@ class Preprocessor
 
     public function tokenize($code, $filename = null)
     {
-        // $tokenPositions = [];
-        // preg_match_all($this->regexes['tokens_start'], $code, $tokenPositions, PREG_OFFSET_CAPTURE);
-
-        // foreach ($this->preflightSource($code) as $position) {
-        //     $cursorPosition = $position[1];
-
-        //     $look = $cursorPosition + strlen($this->options['tag_variable'][0]);
-        //     if ($this->options['whitespace_trim'] === $code[$look]) {
-        //         $look = $look + 1;
-        //     }
-
-        //     // dump(substr($code, 0, $cursorPosition));
-        //     $lineno = 1 + substr_count(substr($code, 0, $cursorPosition), "\n");
-        //     $match = '';
-        //     if (' ' !== $code[$look]) {
-        //         // dump(substr($code, $cursorPosition, $look - $cursorPosition));
-        //         dump('Need whitespace! Found "' . str_replace("\n", "\\n", substr($code, $cursorPosition, $look - $cursorPosition + 10)) . '" at line "' . $lineno . '"');
-        //     }
-
-        //     if (' ' === $code[$look] && preg_match('/\s+/', $code, $match, null, $look)) {
-        //         dump('Only one whitespace needed! Found "' .  substr($code, $cursorPosition, $look - $cursorPosition + 5) . '" at line "' . $lineno . "'");
-        //     }
-        // }
-
+        $this->resetState();
         $this->code = $code;
         $this->end = strlen($code);
-        $this->cursor = 0;
-        $this->lineno = 1;
-        $this->currentPosition = 0;
-        $this->tokens = [];
         $this->tokenPositions = $this->preflightSource($code);
-
-        // dump($this->tokenPositions);
 
         while ($this->cursor < $this->end) {
             $nextToken = $this->getTokenPosition();
@@ -168,7 +147,6 @@ class Preprocessor
                     break;
                 case self::STATE_DATA:
                 default:
-                    // dump([$this->cursor]);
                     if ($this->cursor === $nextToken['position']) {
                         $this->lexStart();
                     } else {
@@ -182,37 +160,98 @@ class Preprocessor
             throw new \Exception("Error Processing Request", 1);
         }
 
-        $this->pushToken(Token::EOF_TYPE, 0, 0);
+        $this->pushToken(Token::EOF_TYPE, 0);
 
-
-        dump($this->tokens);
-        exit;
+        return $this->tokens;
     }
 
     protected function lex($endType, $end, $endRegex)
     {
-
-        // dump($this->cursor, $match[0][1] - $this->cursor);
-
-        // while ($this->cursor < $this->end) {
         preg_match($endRegex, $this->code, $match, PREG_OFFSET_CAPTURE, $this->cursor);
-        // dump($this->cursor);
         if ($match[0][1] === $this->cursor) {
-            $this->pushToken($endType, 0, 0, $match[0][0]);
-            $this->moveCursor(strlen($match[0][0]));
+            $this->pushToken($endType, 0, $match[0][0]);
+            $this->moveCursor($match[0][0]);
             $this->moveCurrentPosition();
             $this->popState();
         } else {
-            $this->pushToken(-2, 0, 0, substr($this->code, $this->cursor, $match[0][1] - $this->cursor));
-            $this->moveCursor($match[0][1] - $this->cursor);
+            if ($this->getState() === self::STATE_COMMENT) {
+                // Parse as text until the end position.
+                $this->lexData($match[0][1]);
+            } else {
+                while ($this->cursor < $match[0][1]) {
+                    dump(['cursor' => $this->cursor, 'limi' => $match[0]]);
+                    $this->lexExpression();
+                }
+            }
         }
-        // }
-        // exit;
     }
 
     protected function lexExpression()
     {
-        // $this->moveCursor();
+        $currentToken = $this->code[$this->cursor];
+        dump(['cursor' => $this->cursor, 'token' => $currentToken]);
+        dump(preg_match(self::REGEX_STRING, $this->code, $match, null, $this->cursor));
+        if (' ' === $currentToken) {
+            dump('white)');
+            $this->lexWhitespace();
+        } elseif (PHP_EOL === $currentToken) {
+            $this->lexEOL();
+        }
+        // operators
+        elseif (preg_match($this->regexes['operator'], $this->code, $match, null, $this->cursor)) {
+            $this->pushToken(Token::OPERATOR_TYPE, $match[0]);
+            $this->moveCursor($match[0]);
+        }
+        // names
+        elseif (preg_match(self::REGEX_NAME, $this->code, $match, null, $this->cursor)) {
+            $this->pushToken(Token::NAME_TYPE, $match[0]);
+            $this->moveCursor($match[0]);
+        }
+        // numbers
+        elseif (preg_match(self::REGEX_NUMBER, $this->code, $match, null, $this->cursor)) {
+            $number = (float) $match[0];  // floats
+            if (ctype_digit($match[0]) && $number <= PHP_INT_MAX) {
+                $number = (int) $match[0]; // integers lower than the maximum
+            }
+            $this->pushToken(Token::NUMBER_TYPE, $number);
+            $this->moveCursor($match[0]);
+        }
+        // punctuation
+        elseif (false !== strpos(self::PUNCTUATION, $this->code[$this->cursor])) {
+            // opening bracket
+            if (false !== strpos('([{', $this->code[$this->cursor])) {
+                $this->brackets[] = array($this->code[$this->cursor], $this->lineno);
+            }
+            // closing bracket
+            elseif (false !== strpos(')]}', $this->code[$this->cursor])) {
+                if (empty($this->brackets)) {
+                    throw new \Exception(sprintf('Unexpected "%s".', $this->code[$this->cursor]));
+                }
+
+                list($expect, $lineno) = array_pop($this->brackets);
+                if ($this->code[$this->cursor] != strtr($expect, '([{', ')]}')) {
+                    throw new \Exception(sprintf('Unclosed "%s".', $expect));
+                }
+            }
+
+            $this->pushToken(Token::PUNCTUATION_TYPE, $this->code[$this->cursor]);
+            ++$this->cursor;
+        }
+        // strings
+        elseif (preg_match(self::REGEX_STRING, $this->code, $match, null, $this->cursor)) {
+            $this->pushToken(Token::STRING_TYPE, stripcslashes(substr($match[0], 1, -1)));
+            $this->moveCursor($match[0]);
+        }
+        // opening double quoted string
+        elseif (preg_match(self::REGEX_DQ_STRING_DELIM, $this->code, $match, null, $this->cursor)) {
+            $this->brackets[] = array('"', $this->lineno);
+            $this->pushState(self::STATE_STRING);
+            $this->moveCursor($match[0]);
+        }
+        // unlexable
+        else {
+            throw new \Exception(sprintf('Unexpected character "%s".', $this->code[$this->cursor]));
+        }
     }
 
     protected function lexBlock()
@@ -236,37 +275,27 @@ class Preprocessor
         $this->lex(Token::COMMENT_END_TYPE, $this->options['tag_comment'][1], $this->regexes['lex_comment']);
     }
 
-    protected function lexData()
+    protected function lexData($limit = null)
     {
-        dump('data');
-
-        // while ($this->cursor < $this->end) {
-            $this->lexRegular();
-        // }
-    }
-
-    protected function lexRegular()
-    {
-        // while ($this->cursor < $this->end) {
-            $currentToken = $this->code[$this->cursor];
-            // dump($currentToken);
+        if (null === $limit) {
             $nextToken = $this->getTokenPosition();
-            // dump($nextToken);
-            if (' ' === $currentToken) {
-                $this->lexWhitespace();
-            } elseif (PHP_EOL === $currentToken) {
-                $this->lexEOL();
-            } elseif (preg_match('/\S+/', $this->code, $match, null, $this->cursor)) {
-                $value = $match[0];
-                dump(['match' => $match, 'cursor' => $this->cursor, 'limit' => $nextToken['position']]);
-                if ($nextToken['position'] <= ($this->cursor + strlen($match[0]))) {
-                    $value = substr($value, 0, $nextToken['position'] - $this->cursor);
-                }
+            $limit = $nextToken['position'];
+        }
 
-                $this->pushToken(Token::TEXT_TYPE, 0, 0, $value);
-                $this->moveCursor(strlen($value));
+        $currentToken = $this->code[$this->cursor];
+        if (' ' === $currentToken) {
+            $this->lexWhitespace();
+        } elseif (PHP_EOL === $currentToken) {
+            $this->lexEOL();
+        } elseif (preg_match('/\S+/', $this->code, $match, null, $this->cursor)) {
+            $value = $match[0];
+            if ($limit <= ($this->cursor + strlen($match[0]))) {
+                $value = substr($value, 0, $nextToken['position'] - $this->cursor);
             }
-        // }
+
+            $this->pushToken(Token::TEXT_TYPE, 0, $value);
+            $this->moveCursor($value);
+        }
     }
 
     protected function lexStart()
@@ -283,20 +312,50 @@ class Preprocessor
             $tokenType = Token::VAR_START_TYPE;
         }
 
-        $this->pushToken($tokenType, 0, 0, $tokenStart['fullMatch']);
+        $this->pushToken($tokenType, 0, $tokenStart['fullMatch']);
         $this->pushState($state);
-        $this->moveCursor(strlen($tokenStart['fullMatch']));
+        $this->moveCursor($tokenStart['fullMatch']);
     }
 
     protected function lexWhitespace()
     {
-        $this->pushToken(Token::WHITESPACE_TYPE, 0, 0, $this->code[$this->cursor]);
-        $this->moveCursor();
+        $this->pushToken(Token::WHITESPACE_TYPE, 0, $this->code[$this->cursor]);
+        $this->moveCursor($this->code[$this->cursor]);
     }
 
     protected function lexEOL()
     {
-        $this->pushToken(Token::EOL_TYPE, 0, 0, $this->code[$this->cursor]);
-        $this->moveCursor();
+        $this->pushToken(Token::EOL_TYPE, 0, $this->code[$this->cursor]);
+        $this->moveCursor($this->code[$this->cursor]);
+    }
+
+    protected function getOperatorRegex()
+    {
+        $operators = array_merge(
+            array('='),
+            array_keys($this->env->getUnaryOperators()),
+            array_keys($this->env->getBinaryOperators())
+        );
+
+        $operators = array_combine($operators, array_map('strlen', $operators));
+        arsort($operators);
+
+        $regex = array();
+        foreach ($operators as $operator => $length) {
+            // an operator that ends with a character must be followed by
+            // a whitespace or a parenthesis
+            if (ctype_alpha($operator[$length - 1])) {
+                $r = preg_quote($operator, '/').'(?=[\s()])';
+            } else {
+                $r = preg_quote($operator, '/');
+            }
+
+            // an operator with a space can be any amount of whitespaces
+            $r = preg_replace('/\s+/', '\s+', $r);
+
+            $regex[] = $r;
+        }
+
+        return '/'.implode('|', $regex).'/A';
     }
 }
