@@ -26,7 +26,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider templateFixtures
      */
-    public function testLinter1($filename)
+    public function testLinter1($filename, $expectWarnings, $expectErrors, $expectFiles, $expectLastMessageLine, $expectLastMessagePosition)
     {
         $file     = __DIR__ . '/Fixtures/' . $filename;
         $template = file_get_contents($file);
@@ -40,13 +40,21 @@ class LinterTest extends \PHPUnit_Framework_TestCase
 
         $report = $this->lint->run([[$template, $file]], $ruleset);
 
-        dump($report);
+        $this->assertEquals($expectErrors, $report->getTotalErrors());
+        $this->assertEquals($expectWarnings, $report->getTotalWarnings());
+        $this->assertEquals($expectFiles, $report->getTotalFiles());
+
+        $messages = $report->getMessages();
+        $lastMessage = $messages[count($messages) - 1];
+
+        $this->assertEquals($expectLastMessageLine, $lastMessage[2]);
+        $this->assertEquals($expectLastMessagePosition, $lastMessage[3]);
     }
 
     public function templateFixtures()
     {
         return [
-            ['mixed.twig'],
+            ['mixed.twig', 4, 0, 1, 30, 55],
         ];
     }
 }

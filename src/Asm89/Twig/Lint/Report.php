@@ -4,7 +4,7 @@ namespace Asm89\Twig\Lint;
 
 class Report
 {
-    const MESSAGE_TYPE_ALL       = 0;
+    const MESSAGE_TYPE_NOTICE    = 0;
     const MESSAGE_TYPE_WARNING   = 1;
     const MESSAGE_TYPE_ERROR     = 2;
 
@@ -12,15 +12,40 @@ class Report
 
     protected $messages;
 
+    protected $totalNotices;
+
+    protected $totalWarnings;
+
+    protected $totalErrors;
+
     public function __construct()
     {
         $this->messages = [];
+        $this->totalNotices = 0;
+        $this->totalWarnings = 0;
+        $this->totalErrors = 0;
     }
 
     public function addMessage($messageType, $message, $line, $position = null, $filename = null, $severity = null)
     {
         if (!$severity) {
             $severity = $this::SEVERITY_DEFAULT;
+        }
+
+        // Update stats
+        switch ($messageType) {
+            case self::MESSAGE_TYPE_NOTICE:
+                ++$this->totalNotices;
+
+                break;
+            case self::MESSAGE_TYPE_WARNING:
+                ++$this->totalWarnings;
+
+                break;
+            case self::MESSAGE_TYPE_ERROR:
+                ++$this->totalErrors;
+
+                break;
         }
 
         $this->messages[] = [
@@ -42,21 +67,28 @@ class Report
 
     public function getTotalFiles()
     {
-        return 0;
+        return count(array_count_values(array_map(function ($message) {
+            return $message[4];
+        }, $this->messages)));
     }
 
-    public function getTotalErrors()
+    public function getTotalMessages()
     {
-        return 0;
+        return count($this->messages());
+    }
+
+    public function getTotalNotices()
+    {
+        return $this->totalNotices;
     }
 
     public function getTotalWarnings()
     {
-        return 0;
+        return $this->totalWarnings;
     }
 
-    public function getReport()
+    public function getTotalErrors()
     {
-        return [];
+        return $this->totalErrors;
     }
 }
