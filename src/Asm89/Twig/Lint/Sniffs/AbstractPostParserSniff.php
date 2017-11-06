@@ -4,30 +4,35 @@ namespace Asm89\Twig\Lint\Sniffs;
 
 abstract class AbstractPostParserSniff implements PostParserSniffInterface
 {
+    protected $report;
+
     public function __construct()
     {
         $this->messages = [];
+        $this->report = null;
     }
 
-    public function addMessage($messageType, $message, $line, $severity = null)
+    public function enable($report)
     {
-        if (!$severity) {
-            $severity = $this::SEVERITY_DEFAULT;
-        }
-
-        $this->messages[] = [
-            $messageType,
-            $message,
-            $line,
-            $severity,
-        ];
+        $this->report = $report;
 
         return $this;
     }
 
-    public function getMessages($messageType = null)
+    public function disable()
     {
-        return $this->messages;
+        $this->report = null;
+
+        return $this;
+    }
+
+    public function getReport()
+    {
+        if (null === $this->report) {
+            throw new \Exception('Sniff is disabled!');
+        }
+
+        return $this->report;
     }
 
     public function isNodeMatching($node, $type, $name = null)

@@ -2,6 +2,7 @@
 
 namespace Asm89\Twig\Lint\Test;
 
+use Asm89\Twig\Lint\Report;
 use Asm89\Twig\Lint\StubbedEnvironment;
 use Twig_Error;
 
@@ -30,19 +31,21 @@ class NodeVisitorTest extends \PHPUnit_Framework_TestCase
         }
 
         $sniffExtension = $this->env->getExtension('Asm89\Twig\Lint\Extension\SniffsExtension');
-        $sniffExtension
-            ->addSniff(new \Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff())
-            ->addSniff(new \Asm89\Twig\Lint\Standards\Generic\Sniffs\TranslationSniff())
-            ->addSniff(new \Asm89\Twig\Lint\Standards\Generic\Sniffs\DumpSniff())
-        ;
+        $report = new Report();
+        foreach ([
+            '\Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff',
+            '\Asm89\Twig\Lint\Standards\Generic\Sniffs\TranslationSniff',
+            '\Asm89\Twig\Lint\Standards\Generic\Sniffs\DumpSniff'
+        ] as $sniffClass) {
+            $sniffs[] = $sniffExtension->addSniff((new $sniffClass())->enable($report));
+        }
 
         $this->env->parse($this->env->tokenize($template, $file));
 
-        $messages = $sniffExtension->getMessages();
+        $messages = $report->getMessages();
         $messageStrings = array_map(function ($message) {
             return $message[1];
         }, $messages);
-        dump($messages);
 
         $this->assertEquals(count($expects), count($messages));
         if ($expects) {

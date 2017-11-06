@@ -1,8 +1,8 @@
 <?php
 
-namespace Asm89\Twig\Lint\Preprocessor;
+namespace Asm89\Twig\Lint\Tokenizer;
 
-class Preprocessor
+class Tokenizer implements TokenizerInterface
 {
     const STATE_DATA        = 0;
     const STATE_BLOCK       = 1;

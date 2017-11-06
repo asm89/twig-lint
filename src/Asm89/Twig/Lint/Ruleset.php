@@ -13,17 +13,10 @@ class Ruleset
         'POST_PARSER'   => 'lint.post_parser',
     ];
 
-    protected $env;
-
-    protected $sniffExtension;
-
     protected $sniffs;
 
-    public function __construct(\Twig_Environment $env)
+    public function __construct()
     {
-        $this->env = $env;
-        $this->sniffExtension = $this->env->getExtension('Asm89\Twig\Lint\Extension\SniffsExtension');
-
         foreach (self::EVENT as $eventName => $eventSlug) {
             $this->sniffs[$eventSlug] = [];
         }
@@ -74,8 +67,8 @@ class Ruleset
             // Store this type of sniff locally.
             $this->addPostParserSniff($sniff);
 
-            // Delegate to twig parser visitor through our sniff twig extension.
-            $this->sniffExtension->addSniff($sniff);
+            // // Delegate to twig parser visitor through our sniff twig extension.
+            // $this->sniffExtension->addSniff($sniff);
 
             return $this;
         }

@@ -3,7 +3,7 @@
 namespace Asm89\Twig\Lint\Test;
 
 use Asm89\Twig\Lint\StubbedEnvironment;
-use Asm89\Twig\Lint\Preprocessor\Preprocessor;
+use Asm89\Twig\Lint\Tokenizer\Tokenizer;
 use Asm89\Twig\Lint\Preprocessor\Token;
 
 use \Twig_Environment;
@@ -27,9 +27,9 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
         $file     = __DIR__ . '/Fixtures/' . $filename;
         $template = file_get_contents($file);
 
-        $preprocessor = new Preprocessor(new Twig_Environment($this->getMockBuilder('Twig_LoaderInterface')->getMock()));
+        $tokenizer = new Tokenizer(new Twig_Environment($this->getMockBuilder('Twig_LoaderInterface')->getMock()));
 
-        $stream = $preprocessor->tokenize($template);
+        $stream = $tokenizer->tokenize($template);
 
         $this->assertCount($expectedTokenCount, $stream);
     }

@@ -2,7 +2,7 @@
 
 namespace Asm89\Twig\Lint\Sniffs;
 
-use Asm89\Twig\Lint\Preprocessor\Token;
+use Asm89\Twig\Lint\Tokenizer\Token;
 
 interface PreParserSniffInterface extends SniffInterface
 {

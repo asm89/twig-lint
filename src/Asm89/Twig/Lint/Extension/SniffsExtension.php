@@ -27,4 +27,16 @@ class SniffsExtension extends \Twig_Extension_Core
 
         return $this;
     }
+
+    public function getSniffs()
+    {
+        return $this->nodeVisitor->getSniffs();
+    }
+
+    public function removeSniff($sniff)
+    {
+        $this->nodeVisitor->removeSniff($sniff);
+
+        return $this;
+    }
 }

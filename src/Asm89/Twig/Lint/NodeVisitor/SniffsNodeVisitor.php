@@ -53,6 +53,15 @@ class SniffsNodeVisitor extends \Twig_BaseNodeVisitor
         $this->sniffs[] = $sniff;
     }
 
+    public function removeSniff(PostParserSniffInterface $toBeRemovedSniff)
+    {
+        foreach ($this->sniffs as $index => $sniff) {
+            if ($toBeRemovedSniff === $sniff) {
+                unset($this->sniffs[$index]);
+            }
+        }
+    }
+
     public function getSniffs()
     {
         return $this->sniffs;

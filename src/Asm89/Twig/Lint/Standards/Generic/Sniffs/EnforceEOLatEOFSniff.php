@@ -2,7 +2,7 @@
 
 namespace Asm89\Twig\Lint\Standards\Generic\Sniffs;
 
-use Asm89\Twig\Lint\Preprocessor\Token;
+use Asm89\Twig\Lint\Tokenizer\Token;
 use Asm89\Twig\Lint\Sniffs\AbstractPreParserSniff;
 
 class EnforceEOLatEOFSniff extends AbstractPreParserSniff
@@ -18,7 +18,7 @@ class EnforceEOLatEOFSniff extends AbstractPreParserSniff
                 ++$i;
             }
 
-            $this->addMessage($this::MESSAGE_TYPE_WARNING, 'Extra EOL or whitespace (x' . ($i - 1) . ') after start of expression', $token->getLine());
+            $this->getReport()->addMessage($this::MESSAGE_TYPE_WARNING, 'Extra EOL or whitespace (x' . ($i - 1) . ') after start of expression', $token->getLine());
         }
 
         if ($this->isTokenMatching($token, Token::EOF_TYPE)) {
@@ -27,7 +27,7 @@ class EnforceEOLatEOFSniff extends AbstractPreParserSniff
                 ++$i;
             }
 
-            $this->addMessage($this::MESSAGE_TYPE_WARNING, 'Extra EOL (x' . ($i - 1) . ') at end of file', $token->getLine());
+            $this->getReport()->addMessage($this::MESSAGE_TYPE_WARNING, 'Extra EOL (x' . ($i - 1) . ') at end of file', $token->getLine());
         }
 
         return $token;

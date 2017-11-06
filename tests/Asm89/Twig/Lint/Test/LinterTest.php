@@ -7,13 +7,14 @@ use Asm89\Twig\Lint\Ruleset;
 use Asm89\Twig\Lint\StubbedEnvironment;
 use Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff;
 use Asm89\Twig\Lint\Standards\Generic\Sniffs\WhitespaceBeforeAfterExpression;
+use Asm89\Twig\Lint\Tokenizer\Tokenizer;
 
-class SniffEngineTest extends \PHPUnit_Framework_TestCase
+class LinterTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
         $this->env = new StubbedEnvironment();
-        $this->lint = new Linter($this->env);
+        $this->lint = new Linter($this->env, new Tokenizer($this->env));
     }
 
     public function testNewEngine()
@@ -29,13 +30,15 @@ class SniffEngineTest extends \PHPUnit_Framework_TestCase
         $file     = __DIR__ . '/Fixtures/' . $filename;
         $template = file_get_contents($file);
 
-        $ruleset = new Ruleset($this->env);
+        $ruleset = new Ruleset();
         $ruleset
             ->addSniff($ruleset::EVENT['PRE_PARSER'], new WhitespaceBeforeAfterExpression())
             ->addSniff($ruleset::EVENT['POST_PARSER'], new IncludeSniff())
         ;
 
-        dump($this->lint->run($template, $ruleset));
+        $report = $this->lint->run([$template], $ruleset);
+
+        dump($report);
     }
 
     public function templateFixtures()

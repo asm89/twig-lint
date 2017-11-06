@@ -1,6 +1,6 @@
 <?php
 
-namespace Asm89\Twig\Lint\Preprocessor;
+namespace Asm89\Twig\Lint\Tokenizer;
 
 class Token
 {

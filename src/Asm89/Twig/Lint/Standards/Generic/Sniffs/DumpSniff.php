@@ -20,6 +20,6 @@ class DumpSniff extends AbstractPostParserSniff
 
     public function sniffDumpFunction($node)
     {
-        $this->addMessage($this::MESSAGE_TYPE_WARNING, 'Found dump() function call', $node->getLine());
+        $this->getReport()->addMessage($this::MESSAGE_TYPE_WARNING, 'Found dump() function call', $node->getLine());
     }
 }

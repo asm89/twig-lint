@@ -11,8 +11,6 @@
 
 namespace Asm89\Twig\Lint\Extension;
 
-use Asm89\Twig\Lint\Sniffs\TwigNodeVisitor;
-
 /**
  * Overridden core extension to stub tests.
  *
