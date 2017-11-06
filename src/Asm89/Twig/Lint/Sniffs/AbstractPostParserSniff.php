@@ -35,6 +35,44 @@ abstract class AbstractPostParserSniff implements PostParserSniffInterface
         return $this->report;
     }
 
+    public function addMessage($messageType, $message, $node, $severity = null)
+    {
+        $this->getReport()->addMessage($messageType, $message, $this->getTemplateLine($node), null, $this->getTemplateName($node), $severity);
+
+        return $this;
+    }
+
+    public function getTemplateLine($node)
+    {
+        if (method_exists($node, 'getTemplateLine')) {
+            return $node->getTemplateLine();
+        }
+
+        if (method_exists($node, 'getLine')) {
+            return $node->getLine();
+        }
+
+        return '';
+    }
+
+    public function getTemplateName($node)
+    {
+        if (method_exists($node, 'getTemplateName')) {
+            return $node->getTemplateName();
+        }
+
+        if (method_exists($node, 'getFilename')) {
+            return $node->getFilename();
+        }
+
+        if ($node->hasAttribute('filename')) {
+            return $node->getAttribute('filename');
+        }
+
+        return '';
+    }
+
+
     public function isNodeMatching($node, $type, $name = null)
     {
         $typeToClass = [

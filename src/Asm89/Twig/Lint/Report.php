@@ -17,7 +17,7 @@ class Report
         $this->messages = [];
     }
 
-    public function addMessage($messageType, $message, $line, $severity = null)
+    public function addMessage($messageType, $message, $line, $position = null, $filename = null, $severity = null)
     {
         if (!$severity) {
             $severity = $this::SEVERITY_DEFAULT;
@@ -27,6 +27,8 @@ class Report
             $messageType,
             $message,
             $line,
+            $position,
+            $filename,
             $severity,
         ];
 

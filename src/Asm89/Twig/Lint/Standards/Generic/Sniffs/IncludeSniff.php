@@ -24,24 +24,23 @@ class IncludeSniff extends AbstractPostParserSniff
 
     public function sniffIncludeTag($node)
     {
-        $this->getReport()->addMessage($this::MESSAGE_TYPE_WARNING, 'Include tag is deprecated, prefer the include() function', $node->getLine());
+        $this->addMessage($this::MESSAGE_TYPE_WARNING, 'Include tag is deprecated, prefer the include() function', $node);
     }
 
     public function sniffIncludeFunction($node)
     {
         $arguments = $node->getNode('arguments');
         if (0 === count($arguments)) {
-            $this->getReport()->addMessage($this::MESSAGE_TYPE_ERROR, 'Missing template (first argument) in include function call()', $node->getLine());
+            $this->addMessage($this::MESSAGE_TYPE_ERROR, 'Missing template (first argument) in include function call()', $node);
         } elseif (false == $arguments->getNode(0)->getAttribute('value')) {
-            $this->getReport()->addMessage($this::MESSAGE_TYPE_ERROR, 'Invalid template (first argument, found "' . ($this->stringifyValue($arguments->getNode(0)->getAttribute('value'))) . '") in include function call()', $node->getLine());
+            $this->addMessage($this::MESSAGE_TYPE_ERROR, 'Invalid template (first argument, found "' . ($this->stringifyValue($arguments->getNode(0)->getAttribute('value'))) . '") in include function call()', $node);
         }
     }
-
 
     public function sniffTagTemplateFormat($node)
     {
         if (false === strpos($node->getNode('expr')->getAttribute('value'), '@')) {
-            $this->getReport()->addMessage($this::MESSAGE_TYPE_WARNING, 'Prefer to use template notation with "@" in include tag', $node->getLine());
+            $this->addMessage($this::MESSAGE_TYPE_WARNING, 'Prefer to use template notation with "@" in include tag', $node);
         }
     }
 
@@ -50,7 +49,7 @@ class IncludeSniff extends AbstractPostParserSniff
         $arguments = $node->getNode('arguments');
         if (count($arguments) && $arguments->getNode(0)->getAttribute('value')) {
             if (false === strpos($arguments->getNode(0)->getAttribute('value'), '@')) {
-                $this->getReport()->addMessage($this::MESSAGE_TYPE_WARNING, 'Prefer to use template notation with "@" in include function call()', $node->getLine());
+                $this->addMessage($this::MESSAGE_TYPE_WARNING, 'Prefer to use template notation with "@" in include function call()', $node);
             }
         }
     }

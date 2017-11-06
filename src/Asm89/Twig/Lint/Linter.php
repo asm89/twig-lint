@@ -48,21 +48,21 @@ class Linter
 
     public function processTemplate($template, $ruleset, $report = null)
     {
-        $stream = $this->tokenizer->tokenize($template);
+        try {
+            $this->env->parse($this->env->tokenize($template[0], $template[1]));
+        } catch (\Twig_Error $e) {
+            dump($e);
+
+            return false;
+        }
+
+        $stream = $this->tokenizer->tokenize($template[0], $template[1]);
 
         $sniffs = $ruleset->getSniffs($ruleset::EVENT['PRE_PARSER']);
         foreach ($stream as $index => $token) {
             foreach ($sniffs as $sniff) {
                 $sniff->process($token, $index, $stream);
             }
-        }
-
-        try {
-            $this->env->parse($this->env->tokenize($template, null));
-        } catch (\Twig_Error $e) {
-            dump($e);
-
-            return false;
         }
 
         return true;

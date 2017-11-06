@@ -31,6 +31,12 @@ abstract class AbstractPreParserSniff implements PreParserSniffInterface
         return $this;
     }
 
+    public function addMessage($messageType, $message, $token, $severity = null)
+    {
+        $this->getReport()->addMessage($messageType, $message, $token->getLine(), $token->getPosition(), $token->getFilename(), $severity);
+
+        return $this;
+    }
 
     public function getReport()
     {

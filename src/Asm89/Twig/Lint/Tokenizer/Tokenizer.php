@@ -100,7 +100,9 @@ class Tokenizer implements TokenizerInterface
 
     protected function pushToken($type, $value = null)
     {
-        $this->tokens[] = new Token($type, $this->lineno, $value);
+        $tokenPositionInLine = $this->cursor - strrpos(substr($this->code, 0, $this->cursor), PHP_EOL);
+
+        $this->tokens[] = new Token($type, $this->lineno, $tokenPositionInLine, $this->filename, $value);
     }
 
     protected function getState()
@@ -124,9 +126,14 @@ class Tokenizer implements TokenizerInterface
 
     public function tokenize($code, $filename = null)
     {
+        // Reset everything.
         $this->resetState();
+
         $this->code = $code;
         $this->end = strlen($code);
+        $this->filename = $filename;
+
+        // Preflight source code for token positions.
         $this->tokenPositions = $this->preflightSource($code);
 
         while ($this->cursor < $this->end) {

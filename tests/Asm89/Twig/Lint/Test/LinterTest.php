@@ -38,7 +38,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
             ->addSniff($ruleset::EVENT['POST_PARSER'], new IncludeSniff())
         ;
 
-        $report = $this->lint->run([$template], $ruleset);
+        $report = $this->lint->run([[$template, $file]], $ruleset);
 
         dump($report);
     }

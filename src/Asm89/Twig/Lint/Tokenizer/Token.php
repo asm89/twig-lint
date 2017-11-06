@@ -21,10 +21,12 @@ class Token
     const COMMENT_START_TYPE = 14;
     const COMMENT_END_TYPE = 15;
 
-    public function __construct($type, $lineno, $value)
+    public function __construct($type, $lineno, $position, $filename, $value = null)
     {
         $this->type = $type;
         $this->lineno = $lineno;
+        $this->position = $position;
+        $this->filename = $filename;
         $this->value = $value;
     }
 
@@ -38,7 +40,17 @@ class Token
         return $this->lineno;
     }
 
-    public function getvalue()
+    public function getFilename()
+    {
+        return $this->filename;
+    }
+
+    public function getPosition()
+    {
+        return $this->position;
+    }
+
+    public function getValue()
     {
         return $this->value;
     }

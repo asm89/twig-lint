@@ -24,21 +24,21 @@ class TranslationSniff extends AbstractPostParserSniff
     public function sniffTransMissingDomain($node)
     {
         if (count($node->getNode('arguments')) < 2) {
-            $this->getReport()->addMessage($this::MESSAGE_TYPE_WARNING, 'Missing domain parameter in trans() filter call', $node->getLine(), 0);
+            $this->addMessage($this::MESSAGE_TYPE_WARNING, 'Missing domain parameter in trans() filter call', $node);
         }
     }
 
     public function sniffTransMissingLang($node)
     {
         if (count($node->getNode('arguments')) < 3) {
-            $this->getReport()->addMessage($this::MESSAGE_TYPE_ERROR, 'Missing lang parameter in trans() filter call', $node->getLine(), 0);
+            $this->addMessage($this::MESSAGE_TYPE_ERROR, 'Missing lang parameter in trans() filter call', $node);
         }
     }
 
     public function sniffTranschoiceMissingLang($node)
     {
         if (count($node->getNode('arguments')) < 4) {
-            $this->getReport()->addMessage($this::MESSAGE_TYPE_ERROR, 'Missing lang parameter in transchoice() filter call', $node->getLine(), 0);
+            $this->addMessage($this::MESSAGE_TYPE_ERROR, 'Missing lang parameter in transchoice() filter call', $node);
         }
     }
 }

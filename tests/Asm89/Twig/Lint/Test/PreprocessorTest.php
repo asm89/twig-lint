@@ -29,7 +29,7 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
 
         $tokenizer = new Tokenizer(new Twig_Environment($this->getMockBuilder('Twig_LoaderInterface')->getMock()));
 
-        $stream = $tokenizer->tokenize($template);
+        $stream = $tokenizer->tokenize($template, $file);
 
         $this->assertCount($expectedTokenCount, $stream);
     }
