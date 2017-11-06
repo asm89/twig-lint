@@ -5,7 +5,6 @@ namespace Asm89\Twig\Lint\Test;
 use Asm89\Twig\Lint\StubbedEnvironment;
 use Asm89\Twig\Lint\Preprocessor\Preprocessor;
 use Asm89\Twig\Lint\Preprocessor\Token;
-use Asm89\Twig\Lint\Standards\Generic\Sniffs\WhitespaceBeforeAfterExpression;
 
 use \Twig_Environment;
 use \Twig_Error;
@@ -23,42 +22,24 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider templateFixtures
      */
-    public function testLexer($filename)
+    public function testLexer($filename, $expectedTokenCount)
     {
         $file     = __DIR__ . '/Fixtures/' . $filename;
         $template = file_get_contents($file);
 
         $preprocessor = new Preprocessor(new Twig_Environment($this->getMockBuilder('Twig_LoaderInterface')->getMock()));
+
         $stream = $preprocessor->tokenize($template);
 
-        $sniff = new WhitespaceBeforeAfterExpression();
-
-        dump($stream);
-        foreach ($stream as $index => $token) {
-            $sniff->process($token, $index, $stream);
-        }
-
-        dump($sniff->getMessages());
-
-        // while (!$stream->isEOF()) {
-        //     switch ($stream->getCurrent()->getType()) {
-        //         case Token::VAR_START_TYPE:
-        //             $next = $stream->next();
-
-        //             if ($next->getType() !== Token::WHITESPACE_TYPE) {
-        //                 // $messages[] = ['Missing whitespace at line']
-        //             }
-
-        //             break;
-        //     }
-        //     dump((string) $stream->next());
-        // }
+        $this->assertCount($expectedTokenCount, $stream);
     }
 
     public function templateFixtures()
     {
         return [
-            ['Lexer/lint_sniff_extra_whitespace_var.twig'],
+            ['Lexer/lint_sniff_extra_eol.twig', 15],
+            ['Lexer/lint_sniff_extra_whitespace_var.twig', 10],
+            ['Lexer/lint_sniff_complete.twig', 212],
         ];
     }
 }

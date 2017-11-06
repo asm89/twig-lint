@@ -2,9 +2,9 @@
 
 namespace Asm89\Twig\Lint\Standards\Generic\Sniffs;
 
-use Asm89\Twig\Lint\Sniffs\AbstractSniff;
+use Asm89\Twig\Lint\Sniffs\AbstractPostParserSniff;
 
-class TranslationSniff extends AbstractSniff
+class TranslationSniff extends AbstractPostParserSniff
 {
     /**
      * {@inheritdoc}

@@ -98,7 +98,7 @@ class Preprocessor
         return $this->tokenPositions[$this->currentPosition];
     }
 
-    protected function pushToken($type, $cusorPosition, $value = null)
+    protected function pushToken($type, $value = null)
     {
         $this->tokens[] = new Token($type, $this->lineno, $value);
     }
@@ -160,7 +160,7 @@ class Preprocessor
             throw new \Exception("Error Processing Request", 1);
         }
 
-        $this->pushToken(Token::EOF_TYPE, 0);
+        $this->pushToken(Token::EOF_TYPE);
 
         return $this->tokens;
     }
@@ -169,7 +169,7 @@ class Preprocessor
     {
         preg_match($endRegex, $this->code, $match, PREG_OFFSET_CAPTURE, $this->cursor);
         if ($match[0][1] === $this->cursor) {
-            $this->pushToken($endType, 0, $match[0][0]);
+            $this->pushToken($endType, $match[0][0]);
             $this->moveCursor($match[0][0]);
             $this->moveCurrentPosition();
             $this->popState();
@@ -179,7 +179,6 @@ class Preprocessor
                 $this->lexData($match[0][1]);
             } else {
                 while ($this->cursor < $match[0][1]) {
-                    dump(['cursor' => $this->cursor, 'limi' => $match[0]]);
                     $this->lexExpression();
                 }
             }
@@ -189,35 +188,29 @@ class Preprocessor
     protected function lexExpression()
     {
         $currentToken = $this->code[$this->cursor];
-        dump(['cursor' => $this->cursor, 'token' => $currentToken]);
-        dump(preg_match(self::REGEX_STRING, $this->code, $match, null, $this->cursor));
         if (' ' === $currentToken) {
-            dump('white)');
             $this->lexWhitespace();
         } elseif (PHP_EOL === $currentToken) {
             $this->lexEOL();
-        }
-        // operators
-        elseif (preg_match($this->regexes['operator'], $this->code, $match, null, $this->cursor)) {
+        } elseif (preg_match($this->regexes['operator'], $this->code, $match, null, $this->cursor)) {
+            // operators
             $this->pushToken(Token::OPERATOR_TYPE, $match[0]);
             $this->moveCursor($match[0]);
-        }
-        // names
-        elseif (preg_match(self::REGEX_NAME, $this->code, $match, null, $this->cursor)) {
+        } elseif (preg_match(self::REGEX_NAME, $this->code, $match, null, $this->cursor)) {
+            // names
             $this->pushToken(Token::NAME_TYPE, $match[0]);
             $this->moveCursor($match[0]);
-        }
-        // numbers
-        elseif (preg_match(self::REGEX_NUMBER, $this->code, $match, null, $this->cursor)) {
+        } elseif (preg_match(self::REGEX_NUMBER, $this->code, $match, null, $this->cursor)) {
+            // numbers
             $number = (float) $match[0];  // floats
             if (ctype_digit($match[0]) && $number <= PHP_INT_MAX) {
                 $number = (int) $match[0]; // integers lower than the maximum
             }
             $this->pushToken(Token::NUMBER_TYPE, $number);
             $this->moveCursor($match[0]);
-        }
-        // punctuation
-        elseif (false !== strpos(self::PUNCTUATION, $this->code[$this->cursor])) {
+        } elseif (false !== strpos(self::PUNCTUATION, $this->code[$this->cursor])) {
+            // punctuation
+
             // opening bracket
             if (false !== strpos('([{', $this->code[$this->cursor])) {
                 $this->brackets[] = array($this->code[$this->cursor], $this->lineno);
@@ -235,43 +228,29 @@ class Preprocessor
             }
 
             $this->pushToken(Token::PUNCTUATION_TYPE, $this->code[$this->cursor]);
-            ++$this->cursor;
-        }
-        // strings
-        elseif (preg_match(self::REGEX_STRING, $this->code, $match, null, $this->cursor)) {
+            $this->moveCursor($this->code[$this->cursor]);
+        } elseif (preg_match(self::REGEX_STRING, $this->code, $match, null, $this->cursor)) {
+            // strings
             $this->pushToken(Token::STRING_TYPE, stripcslashes(substr($match[0], 1, -1)));
             $this->moveCursor($match[0]);
-        }
-        // opening double quoted string
-        elseif (preg_match(self::REGEX_DQ_STRING_DELIM, $this->code, $match, null, $this->cursor)) {
-            $this->brackets[] = array('"', $this->lineno);
-            $this->pushState(self::STATE_STRING);
-            $this->moveCursor($match[0]);
-        }
-        // unlexable
-        else {
+        } else {
+            // unlexable
             throw new \Exception(sprintf('Unexpected character "%s".', $this->code[$this->cursor]));
         }
     }
 
     protected function lexBlock()
     {
-        dump('block');
-
         $this->lex(Token::BLOCK_END_TYPE, $this->options['tag_block'][1], $this->regexes['lex_block']);
     }
 
     protected function lexVariable()
     {
-        dump('variable');
-
         $this->lex(Token::VAR_END_TYPE, $this->options['tag_variable'][1], $this->regexes['lex_variable']);
     }
 
     protected function lexComment()
     {
-        dump('comment');
-
         $this->lex(Token::COMMENT_END_TYPE, $this->options['tag_comment'][1], $this->regexes['lex_comment']);
     }
 
@@ -293,7 +272,7 @@ class Preprocessor
                 $value = substr($value, 0, $nextToken['position'] - $this->cursor);
             }
 
-            $this->pushToken(Token::TEXT_TYPE, 0, $value);
+            $this->pushToken(Token::TEXT_TYPE, $value);
             $this->moveCursor($value);
         }
     }
@@ -312,20 +291,20 @@ class Preprocessor
             $tokenType = Token::VAR_START_TYPE;
         }
 
-        $this->pushToken($tokenType, 0, $tokenStart['fullMatch']);
+        $this->pushToken($tokenType, $tokenStart['fullMatch']);
         $this->pushState($state);
         $this->moveCursor($tokenStart['fullMatch']);
     }
 
     protected function lexWhitespace()
     {
-        $this->pushToken(Token::WHITESPACE_TYPE, 0, $this->code[$this->cursor]);
+        $this->pushToken(Token::WHITESPACE_TYPE, $this->code[$this->cursor]);
         $this->moveCursor($this->code[$this->cursor]);
     }
 
     protected function lexEOL()
     {
-        $this->pushToken(Token::EOL_TYPE, 0, $this->code[$this->cursor]);
+        $this->pushToken(Token::EOL_TYPE, $this->code[$this->cursor]);
         $this->moveCursor($this->code[$this->cursor]);
     }
 

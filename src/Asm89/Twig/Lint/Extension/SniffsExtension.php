@@ -27,18 +27,4 @@ class SniffsExtension extends \Twig_Extension_Core
 
         return $this;
     }
-
-    public function getMessages()
-    {
-        return $this->nodeVisitor->getMessages();
-    }
-
-    // public function getNodeVisitor()
-    // {
-    //     if (!$this->nodeVisitor) {
-    //         $this->nodeVisitor = new SniffsNodeVisitor();
-    //     }
-
-    //     return $this->nodeVisitor;
-    // }
 }

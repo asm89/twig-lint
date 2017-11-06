@@ -14,7 +14,6 @@ class SniffsNodeVisitor extends \Twig_BaseNodeVisitor
     {
         $this->sniffs = $sniffs;
         $this->enabled = $enabled;
-        $this->messages = [];
     }
 
     /**
@@ -59,26 +58,13 @@ class SniffsNodeVisitor extends \Twig_BaseNodeVisitor
         return $this->sniffs;
     }
 
-    public function getMessages()
-    {
-        $messages = [];
-
-        foreach ($this->getSniffs() as $sniff) {
-            $messages = array_merge($messages, $sniff->getMessages());
-        }
-
-        return $messages;
-    }
-
     public function enable()
     {
         $this->enabled = true;
-        $this->messages = array();
     }
 
     public function disable()
     {
         $this->enabled = false;
-        $this->messages = array();
     }
 }
