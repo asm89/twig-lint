@@ -67,9 +67,6 @@ class Ruleset
             // Store this type of sniff locally.
             $this->addPostParserSniff($sniff);
 
-            // // Delegate to twig parser visitor through our sniff twig extension.
-            // $this->sniffExtension->addSniff($sniff);
-
             return $this;
         }
 

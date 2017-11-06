@@ -6,6 +6,7 @@ use Asm89\Twig\Lint\Linter;
 use Asm89\Twig\Lint\Ruleset;
 use Asm89\Twig\Lint\StubbedEnvironment;
 use Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff;
+use Asm89\Twig\Lint\Standards\Generic\Sniffs\SimpleQuotesSniff;
 use Asm89\Twig\Lint\Standards\Generic\Sniffs\WhitespaceBeforeAfterExpression;
 use Asm89\Twig\Lint\Tokenizer\Tokenizer;
 
@@ -33,6 +34,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         $ruleset = new Ruleset();
         $ruleset
             ->addSniff($ruleset::EVENT['PRE_PARSER'], new WhitespaceBeforeAfterExpression())
+            ->addSniff($ruleset::EVENT['PRE_PARSER'], new SimpleQuotesSniff())
             ->addSniff($ruleset::EVENT['POST_PARSER'], new IncludeSniff())
         ;
 
