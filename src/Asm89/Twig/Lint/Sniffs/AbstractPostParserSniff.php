@@ -72,22 +72,28 @@ abstract class AbstractPostParserSniff implements PostParserSniffInterface
         return '';
     }
 
-
     public function isNodeMatching($node, $type, $name = null)
     {
         $typeToClass = [
-            'filter' => function ($node) use ($type, $name) {
+            'filter' => function ($node, $type, $name) {
                 return $node instanceof \Twig_Node_Expression_Filter && $name === $node->getNode($type)->getAttribute('value');
             },
-            'function' => function ($node) use ($type, $name) {
+            'function' => function ($node, $type, $name) {
                 return $node instanceof \Twig_Node_Expression_Function && $name === $node->getAttribute('name');
             },
-            'include' => function ($node) {
+            'include' => function ($node, $type, $name) {
                 return $node instanceof \Twig_Node_Include;
+            },
+            'tag' => function ($node, $type, $name) {
+                return $node->getNodeTag() === $name && $node->hasAttribute('name') && $name === $node->getAttribute('name');
             },
         ];
 
-        return $typeToClass[$type]($node);
+        if (!isset($typeToClass[$type])) {
+            return false;
+        }
+
+        return $typeToClass[$type]($node, $type, $name);
     }
 
     public function stringifyValue($value)
