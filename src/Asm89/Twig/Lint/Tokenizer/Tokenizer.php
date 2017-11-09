@@ -269,7 +269,9 @@ class Tokenizer implements TokenizerInterface
         }
 
         $currentToken = $this->code[$this->cursor];
-        if (' ' === $currentToken) {
+        if (preg_match('/\t/', $currentToken)) {
+            $this->lexTab();
+        } elseif (' ' === $currentToken) {
             $this->lexWhitespace();
         } elseif (PHP_EOL === $currentToken) {
             $this->lexEOL();
@@ -301,6 +303,12 @@ class Tokenizer implements TokenizerInterface
         $this->pushToken($tokenType, $tokenStart['fullMatch']);
         $this->pushState($state);
         $this->moveCursor($tokenStart['fullMatch']);
+    }
+
+    protected function lexTab()
+    {
+        $this->pushToken(Token::TAB_TYPE);
+        $this->moveCursor($this->code[$this->cursor]);
     }
 
     protected function lexWhitespace()

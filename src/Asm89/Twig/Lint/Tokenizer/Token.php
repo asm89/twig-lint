@@ -17,9 +17,10 @@ class Token
     const PUNCTUATION_TYPE = 9;
     const INTERPOLATION_START_TYPE = 10;
     const WHITESPACE_TYPE = 12;
-    const EOL_TYPE = 13;
-    const COMMENT_START_TYPE = 14;
-    const COMMENT_END_TYPE = 15;
+    const TAB_TYPE = 13;
+    const EOL_TYPE = 14;
+    const COMMENT_START_TYPE = 15;
+    const COMMENT_END_TYPE = 16;
 
     public function __construct($type, $lineno, $position, $filename, $value = null)
     {

@@ -4,6 +4,7 @@ namespace Asm89\Twig\Lint;
 
 use Asm89\Twig\Lint\Tokenizer\TokenizerInterface;
 use Asm89\Twig\Lint\Sniffs\PostParserSniffInterface;
+use Symfony\Component\Finder\Finder;
 
 class Linter
 {
@@ -20,8 +21,10 @@ class Linter
         $this->tokenizer = $tokenizer;
     }
 
-    public function run($templates, $ruleset)
+    public function run($fileOrDirectory, $ruleset)
     {
+        $files = $this->findFiles($fileOrDirectory);
+
         $report = new Report();
         foreach ($ruleset->getSniffs() as $sniff) {
             if ($sniff instanceof PostParserSniffInterface) {
@@ -31,8 +34,8 @@ class Linter
             $sniff->enable($report);
         }
 
-        foreach ($templates as $template) {
-            $this->processTemplate($template, $ruleset, $report);
+        foreach ($files as $file) {
+            $this->processTemplate($file, $ruleset, $report);
         }
 
         foreach ($ruleset->getSniffs() as $sniff) {
@@ -46,8 +49,10 @@ class Linter
         return $report;
     }
 
-    public function processTemplate($template, $ruleset, $report = null)
+    public function processTemplate($file, $ruleset, $report = null)
     {
+        $template = [file_get_contents($file), $file];
+
         try {
             $this->env->parse($this->env->tokenize($template[0], $template[1]));
         } catch (\Twig_Error $e) {
@@ -66,5 +71,27 @@ class Linter
         }
 
         return true;
+    }
+
+    public function findFiles($filename, $exclude = null)
+    {
+        $files = [];
+        if (is_file($filename)) {
+            $files = [$filename];
+        } elseif (is_dir($filename)) {
+            $files = Finder::create()->files()->in($filename)->name('*.twig')->filter(
+                // pass in the list of excludes
+                function (\SplFileInfo $file) use ($exclude) {
+                    foreach ($exclude as $excludeItem) {
+                        if (1 === preg_match('#' . $excludeItem . '#', $file->getRealPath())) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            );
+        }
+
+        return $files;
     }
 }

@@ -5,12 +5,15 @@ namespace Asm89\Twig\Lint\Test;
 use Asm89\Twig\Lint\Linter;
 use Asm89\Twig\Lint\Ruleset;
 use Asm89\Twig\Lint\StubbedEnvironment;
+use Asm89\Twig\Lint\Standards\Generic\Sniffs\DisallowTabIndentSniff;
 use Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff;
 use Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashTrailingCommaSniff;
 use Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff;
 use Asm89\Twig\Lint\Standards\Generic\Sniffs\SimpleQuotesSniff;
 use Asm89\Twig\Lint\Standards\Generic\Sniffs\WhitespaceBeforeAfterExpression;
 use Asm89\Twig\Lint\Tokenizer\Tokenizer;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 
 class LinterTest extends \PHPUnit_Framework_TestCase
 {
@@ -30,8 +33,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
      */
     public function testLinter1($filename, $expectWarnings, $expectErrors, $expectFiles, $expectLastMessageLine, $expectLastMessagePosition)
     {
-        $file     = __DIR__ . '/Fixtures/' . $filename;
-        $template = file_get_contents($file);
+        $file = __DIR__ . '/Fixtures/' . $filename;
 
         $ruleset = new Ruleset();
         $ruleset
@@ -40,7 +42,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
             ->addSniff($ruleset::EVENT['POST_PARSER'], new IncludeSniff())
         ;
 
-        $report = $this->lint->run([[$template, $file]], $ruleset);
+        $report = $this->lint->run($file, $ruleset);
 
         $this->assertEquals($expectErrors, $report->getTotalErrors());
         $this->assertEquals($expectWarnings, $report->getTotalWarnings());
@@ -53,29 +55,38 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectLastMessagePosition, $lastMessage[3]);
     }
 
-    public function checkGenericSniff($filename, $sniff, $expects)
+    /**
+     * @dataProvider dataConfigYml
+     */
+    public function testConfigYml1($filename, $expectCount)
     {
-        $file     = __DIR__ . '/Fixtures/' . $filename;
-        $template = file_get_contents($file);
+        $file = __DIR__ . '/Fixtures/' . $filename;
+
+        try {
+            $value = Yaml::parse(file_get_contents($file));
+        } catch (ParseException $e) {
+            $this->assertTrue(false, sprinft('Unable to parse the YAML string: %s', $e->getMessage()));
+        }
+
+        $this->assertCount($expectCount, $value['ruleset']);
 
         $ruleset = new Ruleset();
-        $ruleset
-            ->addSniff($ruleset::EVENT['PRE_PARSER'], $sniff)
-        ;
+        foreach ($value['ruleset'] as $rule) {
+            $this->assertContains($rule['type'], ['PRE_PARSER', 'POST_PARSER']);
 
-        $report = $this->lint->run([[$template, $file]], $ruleset);
-
-        dump($report);
-        $this->assertEquals(count($expects), $report->getTotalWarnings());
-        if ($expects) {
-            $messageStrings = array_map(function ($message) {
-                return $message[1];
-            }, $report->getMessages());
-
-            foreach ($expects as $expect) {
-                $this->assertContains($expect, $messageStrings);
-            }
+            $ruleset->addSniff($ruleset::EVENT[$rule['type']], new $rule['class']);
         }
+
+        $sniffs = $ruleset->getSniffs();
+        $this->assertCount($expectCount, $sniffs);
+    }
+
+    /**
+     * @dataProvider dataTabIndent
+     */
+    public function testTabIndent($filename, $sniff, $expects)
+    {
+        $this->checkGenericSniff($filename, $sniff, $expects);
     }
 
     /**
@@ -98,6 +109,24 @@ class LinterTest extends \PHPUnit_Framework_TestCase
     {
         return [
             ['mixed.twig', 4, 0, 1, 30, 55],
+        ];
+    }
+
+    public function dataTabIndent()
+    {
+        return [
+            ['Lexer/lint_sniff_tabs_indent.twig', new DisallowTabIndentSniff(), [
+                'Indentation using tabs is not allowed; use spaces instead',
+                'Indentation using tabs is not allowed; use spaces instead',
+                'Indentation using tabs is not allowed; use spaces instead',
+            ]],
+        ];
+    }
+
+    public function dataConfigYml()
+    {
+        return [
+            ['config/twigcs_1.yml', 2],
         ];
     }
 
@@ -142,5 +171,29 @@ class LinterTest extends \PHPUnit_Framework_TestCase
                 'Hash requires trailing comma after \']\'',
             ]],
         ];
+    }
+
+    protected function checkGenericSniff($filename, $sniff, $expects)
+    {
+        $file = __DIR__ . '/Fixtures/' . $filename;
+
+        $ruleset = new Ruleset();
+        $ruleset
+            ->addSniff($ruleset::EVENT['PRE_PARSER'], $sniff)
+        ;
+
+        $report = $this->lint->run($file, $ruleset);
+
+        dump($report);
+        $this->assertEquals(count($expects), $report->getTotalWarnings());
+        if ($expects) {
+            $messageStrings = array_map(function ($message) {
+                return $message[1];
+            }, $report->getMessages());
+
+            foreach ($expects as $expect) {
+                $this->assertContains($expect, $messageStrings);
+            }
+        }
     }
 }

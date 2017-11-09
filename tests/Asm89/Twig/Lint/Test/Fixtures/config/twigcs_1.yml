@@ -1,0 +1,10 @@
+ruleset:
+  -
+    class: '\Asm89\Twig\Lint\Standards\Generic\Sniffs\WhitespaceBeforeAfterExpression'
+    parameters:
+      severity: 1
+      required_whitespace: 1
+    type: 'PRE_PARSER'
+  -
+    class: '\Asm89\Twig\Lint\Standards\Generic\Sniffs\DumpSniff'
+    type: 'POST_PARSER'
