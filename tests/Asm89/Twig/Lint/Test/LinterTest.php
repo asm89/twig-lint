@@ -7,12 +7,6 @@ use Asm89\Twig\Lint\Linter;
 use Asm89\Twig\Lint\Ruleset;
 use Asm89\Twig\Lint\Sniffs\SniffInterface;
 use Asm89\Twig\Lint\StubbedEnvironment;
-use Asm89\Twig\Lint\Standards\Generic\Sniffs\DisallowTabIndentSniff;
-use Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff;
-use Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashTrailingCommaSniff;
-use Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff;
-use Asm89\Twig\Lint\Standards\Generic\Sniffs\SimpleQuotesSniff;
-use Asm89\Twig\Lint\Standards\Generic\Sniffs\WhitespaceBeforeAfterExpression;
 use Asm89\Twig\Lint\Tokenizer\Tokenizer;
 use Symfony\Component\Config\FileLocator;
 
@@ -38,9 +32,9 @@ class LinterTest extends \PHPUnit_Framework_TestCase
 
         $ruleset = new Ruleset();
         $ruleset
-            ->addSniff(new WhitespaceBeforeAfterExpression())
-            ->addSniff(new SimpleQuotesSniff())
-            ->addSniff(new IncludeSniff())
+            ->addSniff(new \Asm89\Twig\Lint\Standards\Generic\Sniffs\WhitespaceBeforeAfterExpression())
+            ->addSniff(new \Asm89\Twig\Lint\Standards\Generic\Sniffs\SimpleQuotesSniff())
+            ->addSniff(new \Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff())
         ;
 
         $report = $this->lint->run($file, $ruleset);
@@ -54,6 +48,14 @@ class LinterTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($expectLastMessageLine, $lastMessage[2]);
         $this->assertEquals($expectLastMessagePosition, $lastMessage[3]);
+    }
+
+    /**
+     * @dataProvider dataBySniff
+     */
+    public function testLinter2($isFile, $filename, $sniff, $expects)
+    {
+        $this->checkGenericSniff($filename, $sniff, $expects);
     }
 
     /**
@@ -94,30 +96,6 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(0, $ruleset->getSniffs());
     }
 
-    /**
-     * @dataProvider dataTabIndent
-     */
-    public function testTabIndent($filename, $sniff, $expects)
-    {
-        $this->checkGenericSniff($filename, $sniff, $expects);
-    }
-
-    /**
-     * @dataProvider dataProviderLintHash1
-     */
-    public function testLintHash1($filename, $sniff, $expects)
-    {
-        $this->checkGenericSniff($filename, $sniff, $expects);
-    }
-
-    /**
-     * @dataProvider dataProviderLintHash2
-     */
-    public function testLintHash2($filename, $sniff, $expects)
-    {
-        $this->checkGenericSniff($filename, $sniff, $expects);
-    }
-
     public function templateFixtures()
     {
         return [
@@ -125,13 +103,73 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-    public function dataTabIndent()
+    public function dataBySniff()
     {
         return [
-            ['Lexer/lint_sniff_tabs_indent.twig', new DisallowTabIndentSniff(), [
+            [true, 'Lexer/tokenizer_5.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\DisallowTabIndentSniff(), [
                 'Indentation using tabs is not allowed; use spaces instead',
                 'Indentation using tabs is not allowed; use spaces instead',
                 'Indentation using tabs is not allowed; use spaces instead',
+            ]],
+            [true, 'Dump/lint_sniff_dump_tag.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\DumpSniff(), [
+                'Found {% dump %} tag',
+            ]],
+            [true, 'Dump/lint_sniff_dump_function.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\DumpSniff(), [
+                'Found dump() function call',
+            ]],
+            [true, 'Include/lint_sniff_include_tag.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff(), [
+                'Include tag is deprecated, prefer the include() function',
+                'Prefer to use template notation with "@" in include tag',
+            ]],
+            [true, 'Include/lint_sniff_include_function.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff(), [
+                'Prefer to use template notation with "@" in include function call()',
+            ]],
+            [true, 'Include/lint_sniff_include_no.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff(), [
+                'Missing template (first argument) in include function call()',
+                'Invalid template (first argument, found "") in include function call()',
+                'Invalid template (first argument, found "null") in include function call()',
+                'Invalid template (first argument, found "false") in include function call()',
+            ]],
+            [true, 'Translation/lint_sniff_trans_no.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\TranslationSniff(), [
+                'Missing lang parameter in trans() filter call',
+                'Missing domain parameter in trans() filter call'
+            ]],
+            [true, 'Translation/lint_sniff_trans.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\TranslationSniff(), [
+                'Missing lang parameter in trans() filter call'
+            ]],
+            [true, 'Translation/lint_sniff_transchoice.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\TranslationSniff(), [
+                'Missing lang parameter in transchoice() filter call'
+            ]],
+            [true, 'Hash/lint_hash_1.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff(), [
+                'Hash key \'4\' requires quotes; use single quotes',
+                'Hash key \'isX\' requires quotes; use single quotes',
+                'Hash key \'isY\' requires quotes; use single quotes',
+            ]],
+            [true, 'Hash/lint_hash_2.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff(), [
+                'Hash key \'is_true\' requires quotes; use single quotes',
+                'Hash key \'display_errors\' requires quotes; use single quotes',
+                'Hash key \'name\' requires quotes; use single quotes',
+            ]],
+            [true, 'Hash/lint_hash_3.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff(), []],
+            [true, 'Hash/lint_hash_4.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff(), [
+                'Hash key \'lvl1_x\' requires quotes; use single quotes',
+                'Hash key \'lvl1_y\' requires quotes; use single quotes',
+                'Hash key \'lvl1_y\' requires quotes; use single quotes',
+                'Hash key \'lvl2_x\' requires quotes; use single quotes',
+                'Hash key \'lvl3_z\' requires quotes; use single quotes',
+            ]],
+            [true, 'Hash/lint_hash_1.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashTrailingCommaSniff(), [
+                'Hash requires trailing comma after \'azerty\''
+            ]],
+            [true, 'Hash/lint_hash_2.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashTrailingCommaSniff(), [
+                'Hash requires trailing comma after \'lastname\''
+            ]],
+            [true, 'Hash/lint_hash_3.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashTrailingCommaSniff(), []],
+            [true, 'Hash/lint_hash_4.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashTrailingCommaSniff(), [
+                'Hash requires trailing comma after \'45.5\'',
+                'Hash requires trailing comma after \'Oyoyo\'',
+                'Hash requires trailing comma after \'}\'',
+                'Hash requires trailing comma after \']\'',
             ]],
         ];
     }
@@ -147,49 +185,6 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-    public function dataProviderLintHash1()
-    {
-        return [
-            ['Hash/lint_hash_1.twig', new EnforceHashKeyQuotesSniff(), [
-                'Hash key \'4\' requires quotes; use single quotes',
-                'Hash key \'isX\' requires quotes; use single quotes',
-                'Hash key \'isY\' requires quotes; use single quotes',
-            ]],
-            ['Hash/lint_hash_2.twig', new EnforceHashKeyQuotesSniff(), [
-                'Hash key \'is_true\' requires quotes; use single quotes',
-                'Hash key \'display_errors\' requires quotes; use single quotes',
-                'Hash key \'name\' requires quotes; use single quotes',
-            ]],
-            ['Hash/lint_hash_3.twig', new EnforceHashKeyQuotesSniff(), []],
-            ['Hash/lint_hash_4.twig', new EnforceHashKeyQuotesSniff(), [
-                'Hash key \'lvl1_x\' requires quotes; use single quotes',
-                'Hash key \'lvl1_y\' requires quotes; use single quotes',
-                'Hash key \'lvl1_y\' requires quotes; use single quotes',
-                'Hash key \'lvl2_x\' requires quotes; use single quotes',
-                'Hash key \'lvl3_z\' requires quotes; use single quotes',
-            ]],
-        ];
-    }
-
-    public function dataProviderLintHash2()
-    {
-        return [
-            ['Hash/lint_hash_1.twig', new EnforceHashTrailingCommaSniff(), [
-                'Hash requires trailing comma after \'azerty\''
-            ]],
-            ['Hash/lint_hash_2.twig', new EnforceHashTrailingCommaSniff(), [
-                'Hash requires trailing comma after \'lastname\''
-            ]],
-            ['Hash/lint_hash_3.twig', new EnforceHashTrailingCommaSniff(), []],
-            ['Hash/lint_hash_4.twig', new EnforceHashTrailingCommaSniff(), [
-                'Hash requires trailing comma after \'45.5\'',
-                'Hash requires trailing comma after \'Oyoyo\'',
-                'Hash requires trailing comma after \'}\'',
-                'Hash requires trailing comma after \']\'',
-            ]],
-        ];
-    }
-
     protected function checkGenericSniff($filename, $sniff, $expects)
     {
         $file = __DIR__ . '/Fixtures/' . $filename;
@@ -201,8 +196,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
 
         $report = $this->lint->run($file, $ruleset);
 
-        dump($report);
-        $this->assertEquals(count($expects), $report->getTotalWarnings());
+        $this->assertEquals(count($expects), $report->getTotalWarnings() + $report->getTotalErrors());
         if ($expects) {
             $messageStrings = array_map(function ($message) {
                 return $message[1];

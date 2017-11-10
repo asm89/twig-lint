@@ -135,7 +135,6 @@ class Tokenizer implements TokenizerInterface
 
         // Preflight source code for token positions.
         $this->tokenPositions = $this->preflightSource($code);
-
         while ($this->cursor < $this->end) {
             $nextToken = $this->getTokenPosition();
 
@@ -263,8 +262,8 @@ class Tokenizer implements TokenizerInterface
 
     protected function lexData($limit = null)
     {
+        $nextToken = $this->getTokenPosition();
         if (null === $limit) {
-            $nextToken = $this->getTokenPosition();
             $limit = $nextToken['position'];
         }
 
@@ -277,8 +276,16 @@ class Tokenizer implements TokenizerInterface
             $this->lexEOL();
         } elseif (preg_match('/\S+/', $this->code, $match, null, $this->cursor)) {
             $value = $match[0];
-            if ($limit <= ($this->cursor + strlen($match[0]))) {
+
+            // Stop if cursor reaches the next token start.
+            if ($limit <= ($this->cursor + strlen($value))) {
                 $value = substr($value, 0, $nextToken['position'] - $this->cursor);
+            }
+
+            // Fixing token start among expressions and comments.
+            $nbTokenStart = preg_match_all($this->regexes['tokens_start'], $value);
+            if ($nbTokenStart) {
+                $this->moveCurrentPosition($nbTokenStart);
             }
 
             $this->pushToken(Token::TEXT_TYPE, $value);
