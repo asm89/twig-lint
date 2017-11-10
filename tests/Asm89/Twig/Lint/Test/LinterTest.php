@@ -106,66 +106,66 @@ class LinterTest extends \PHPUnit_Framework_TestCase
     public function dataBySniff()
     {
         return [
-            [true, 'Lexer/tokenizer_5.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\DisallowTabIndentSniff(), [
+            [true, 'Tokenizer/tokenizer_5.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\DisallowTabIndentSniff(), [
                 'Indentation using tabs is not allowed; use spaces instead',
                 'Indentation using tabs is not allowed; use spaces instead',
                 'Indentation using tabs is not allowed; use spaces instead',
             ]],
-            [true, 'Dump/lint_sniff_dump_tag.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\DumpSniff(), [
+            [true, 'Linter/dump_tag.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\DumpSniff(), [
                 'Found {% dump %} tag',
             ]],
-            [true, 'Dump/lint_sniff_dump_function.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\DumpSniff(), [
+            [true, 'Linter/dump_function.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\DumpSniff(), [
                 'Found dump() function call',
             ]],
-            [true, 'Include/lint_sniff_include_tag.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff(), [
+            [true, 'Linter/include_tag.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff(), [
                 'Include tag is deprecated, prefer the include() function',
                 'Prefer to use template notation with "@" in include tag',
             ]],
-            [true, 'Include/lint_sniff_include_function.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff(), [
+            [true, 'Linter/include_function.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff(), [
                 'Prefer to use template notation with "@" in include function call()',
             ]],
-            [true, 'Include/lint_sniff_include_no.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff(), [
+            [true, 'Linter/include_no.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff(), [
                 'Missing template (first argument) in include function call()',
                 'Invalid template (first argument, found "") in include function call()',
                 'Invalid template (first argument, found "null") in include function call()',
                 'Invalid template (first argument, found "false") in include function call()',
             ]],
-            [true, 'Translation/lint_sniff_trans_no.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\TranslationSniff(), [
+            [true, 'Linter/trans_no.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\TranslationSniff(), [
                 'Missing lang parameter in trans() filter call',
                 'Missing domain parameter in trans() filter call'
             ]],
-            [true, 'Translation/lint_sniff_trans.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\TranslationSniff(), [
+            [true, 'Linter/trans.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\TranslationSniff(), [
                 'Missing lang parameter in trans() filter call'
             ]],
-            [true, 'Translation/lint_sniff_transchoice.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\TranslationSniff(), [
+            [true, 'Linter/transchoice.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\TranslationSniff(), [
                 'Missing lang parameter in transchoice() filter call'
             ]],
-            [true, 'Hash/lint_hash_1.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff(), [
+            [true, 'Linter/hash_1.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff(), [
                 'Hash key \'4\' requires quotes; use single quotes',
                 'Hash key \'isX\' requires quotes; use single quotes',
                 'Hash key \'isY\' requires quotes; use single quotes',
             ]],
-            [true, 'Hash/lint_hash_2.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff(), [
+            [true, 'Linter/hash_2.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff(), [
                 'Hash key \'is_true\' requires quotes; use single quotes',
                 'Hash key \'display_errors\' requires quotes; use single quotes',
                 'Hash key \'name\' requires quotes; use single quotes',
             ]],
-            [true, 'Hash/lint_hash_3.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff(), []],
-            [true, 'Hash/lint_hash_4.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff(), [
+            [true, 'Linter/hash_3.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff(), []],
+            [true, 'Linter/hash_4.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff(), [
                 'Hash key \'lvl1_x\' requires quotes; use single quotes',
                 'Hash key \'lvl1_y\' requires quotes; use single quotes',
                 'Hash key \'lvl1_y\' requires quotes; use single quotes',
                 'Hash key \'lvl2_x\' requires quotes; use single quotes',
                 'Hash key \'lvl3_z\' requires quotes; use single quotes',
             ]],
-            [true, 'Hash/lint_hash_1.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashTrailingCommaSniff(), [
+            [true, 'Linter/hash_1.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashTrailingCommaSniff(), [
                 'Hash requires trailing comma after \'azerty\''
             ]],
-            [true, 'Hash/lint_hash_2.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashTrailingCommaSniff(), [
+            [true, 'Linter/hash_2.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashTrailingCommaSniff(), [
                 'Hash requires trailing comma after \'lastname\''
             ]],
-            [true, 'Hash/lint_hash_3.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashTrailingCommaSniff(), []],
-            [true, 'Hash/lint_hash_4.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashTrailingCommaSniff(), [
+            [true, 'Linter/hash_3.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashTrailingCommaSniff(), []],
+            [true, 'Linter/hash_4.twig', new \Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashTrailingCommaSniff(), [
                 'Hash requires trailing comma after \'45.5\'',
                 'Hash requires trailing comma after \'Oyoyo\'',
                 'Hash requires trailing comma after \'}\'',

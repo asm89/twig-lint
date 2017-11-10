@@ -27,11 +27,11 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
     public function templateFixtures()
     {
         return [
-            ['Lexer/tokenizer_1.twig', 52],
-            ['Lexer/tokenizer_2.twig', 10],
-            ['Lexer/tokenizer_3.twig', 15],
-            ['Lexer/tokenizer_4.twig', 212],
-            ['Lexer/tokenizer_5.twig', 46],
+            ['Tokenizer/tokenizer_1.twig', 52],
+            ['Tokenizer/tokenizer_2.twig', 10],
+            ['Tokenizer/tokenizer_3.twig', 15],
+            ['Tokenizer/tokenizer_4.twig', 212],
+            ['Tokenizer/tokenizer_5.twig', 46],
             ['mixed.twig', 385],
         ];
     }
