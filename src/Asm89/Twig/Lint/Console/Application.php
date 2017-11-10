@@ -12,6 +12,7 @@
 namespace Asm89\Twig\Lint\Console;
 
 use Asm89\Twig\Lint\Command\LintCommand;
+use Asm89\Twig\Lint\Command\TwigCSCommand;
 use Symfony\Component\Console\Application as BaseApplication;
 
 /**
@@ -28,6 +29,7 @@ class Application extends BaseApplication
     {
         $commands = parent::getDefaultCommands();
         $commands[] = new LintCommand();
+        $commands[] = new TwigCSCommand();
 
         return $commands;
     }

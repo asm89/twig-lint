@@ -5,7 +5,7 @@
 
     {{  include('@Some', {x: 1 }) }}
 
-        {% if (x is same as ('12') or currentX is not defined) and true %}
+        {% if (x is same as('12') or currentX is not defined) and true %}
             {%- set currentX =
                 '123422340' -%}
         {% endif %}
@@ -14,6 +14,3 @@
     {# Hello #}
     {{ 'oyo.x.y'|trans( {}, "front")        }}
 {% endblock body %}
-{% endblock body %}
-
-

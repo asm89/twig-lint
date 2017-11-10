@@ -47,15 +47,15 @@ class LinterTest extends \PHPUnit_Framework_TestCase
 
         $report = $this->lint->run($file, $ruleset);
 
-        $this->assertEquals($expectErrors, $report->getTotalErrors());
-        $this->assertEquals($expectWarnings, $report->getTotalWarnings());
-        $this->assertEquals($expectFiles, $report->getTotalFiles());
+        $this->assertEquals($expectErrors, $report->getTotalErrors(), 'Number of errors');
+        $this->assertEquals($expectWarnings, $report->getTotalWarnings(), 'Number of warnings');
+        $this->assertEquals($expectFiles, $report->getTotalFiles(), 'Number of files');
 
         $messages = $report->getMessages();
         $lastMessage = $messages[count($messages) - 1];
 
-        $this->assertEquals($expectLastMessageLine, $lastMessage[2]);
-        $this->assertEquals($expectLastMessagePosition, $lastMessage[3]);
+        $this->assertEquals($expectLastMessageLine, $lastMessage[2], 'Line number of the error');
+        $this->assertEquals($expectLastMessagePosition, $lastMessage[3], 'Line position of the error (if any)');
     }
 
     /**
@@ -121,6 +121,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
     public function templateFixtures()
     {
         return [
+            ['Linter/error_1.twig', 0, 1, 1, 1, null],
             ['mixed.twig', 4, 0, 1, 30, 55],
         ];
     }

@@ -5,7 +5,6 @@ namespace Asm89\Twig\Lint;
 use Asm89\Twig\Lint\Tokenizer\TokenizerInterface;
 use Asm89\Twig\Lint\Sniffs\SniffInterface;
 use Asm89\Twig\Lint\Sniffs\PostParserSniffInterface;
-use Symfony\Component\Finder\Finder;
 
 class Linter
 {
@@ -22,9 +21,11 @@ class Linter
         $this->tokenizer = $tokenizer;
     }
 
-    public function run($fileOrDirectory, $ruleset)
+    public function run($files, $ruleset)
     {
-        $files = $this->findFiles($fileOrDirectory);
+        if (!is_array($files) && !$files instanceof \Traversable) {
+            $files = array($files);
+        }
 
         $report = new Report();
         foreach ($ruleset->getSniffs() as $sniff) {
@@ -50,7 +51,7 @@ class Linter
         return $report;
     }
 
-    public function processTemplate($file, $ruleset, $report = null)
+    public function processTemplate($file, $ruleset, $report)
     {
         $template = [file_get_contents($file), $file];
 
@@ -58,6 +59,17 @@ class Linter
             $this->env->parse($this->env->tokenize($template[0], $template[1]));
         } catch (\Twig_Error $e) {
             dump($e);
+            // $messageType, $message, $line, $position = null, $filename = null, $severity = null
+            $sourceContext = $e->getSourceContext();
+
+            $report->addMessage(
+                SniffInterface::MESSAGE_TYPE_ERROR,
+                $e->getRawMessage(),
+                $e->getTemplateLine(),
+                null,
+                $e->getSourceContext()->getName(),
+                SniffInterface::SEVERITY_MAX
+            );
 
             return false;
         }
@@ -72,27 +84,5 @@ class Linter
         }
 
         return true;
-    }
-
-    public function findFiles($filename, $exclude = null)
-    {
-        $files = [];
-        if (is_file($filename)) {
-            $files = [$filename];
-        } elseif (is_dir($filename)) {
-            $files = Finder::create()->files()->in($filename)->name('*.twig')->filter(
-                // pass in the list of excludes
-                function (\SplFileInfo $file) use ($exclude) {
-                    foreach ($exclude as $excludeItem) {
-                        if (1 === preg_match('#' . $excludeItem . '#', $file->getRealPath())) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-            );
-        }
-
-        return $files;
     }
 }

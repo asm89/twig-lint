@@ -62,7 +62,7 @@ class Report
     public function getTotalFiles()
     {
         return count(array_count_values(array_map(function ($message) {
-            return $message[4];
+            return (string) $message[4];
         }, $this->messages)));
     }
 
