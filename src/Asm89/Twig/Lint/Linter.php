@@ -3,6 +3,7 @@
 namespace Asm89\Twig\Lint;
 
 use Asm89\Twig\Lint\Tokenizer\TokenizerInterface;
+use Asm89\Twig\Lint\Sniffs\SniffInterface;
 use Asm89\Twig\Lint\Sniffs\PostParserSniffInterface;
 use Symfony\Component\Finder\Finder;
 
@@ -63,7 +64,7 @@ class Linter
 
         $stream = $this->tokenizer->tokenize($template[0], $template[1]);
 
-        $sniffs = $ruleset->getSniffs($ruleset::EVENT['PRE_PARSER']);
+        $sniffs = $ruleset->getSniffs(SniffInterface::TYPE['PRE_PARSER']);
         foreach ($stream as $index => $token) {
             foreach ($sniffs as $sniff) {
                 $sniff->process($token, $index, $stream);

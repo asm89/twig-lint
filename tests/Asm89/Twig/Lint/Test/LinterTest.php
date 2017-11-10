@@ -2,8 +2,10 @@
 
 namespace Asm89\Twig\Lint\Test;
 
+use Asm89\Twig\Lint\Config\Loader;
 use Asm89\Twig\Lint\Linter;
 use Asm89\Twig\Lint\Ruleset;
+use Asm89\Twig\Lint\Sniffs\SniffInterface;
 use Asm89\Twig\Lint\StubbedEnvironment;
 use Asm89\Twig\Lint\Standards\Generic\Sniffs\DisallowTabIndentSniff;
 use Asm89\Twig\Lint\Standards\Generic\Sniffs\EnforceHashKeyQuotesSniff;
@@ -12,8 +14,7 @@ use Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff;
 use Asm89\Twig\Lint\Standards\Generic\Sniffs\SimpleQuotesSniff;
 use Asm89\Twig\Lint\Standards\Generic\Sniffs\WhitespaceBeforeAfterExpression;
 use Asm89\Twig\Lint\Tokenizer\Tokenizer;
-use Symfony\Component\Yaml\Exception\ParseException;
-use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Config\FileLocator;
 
 class LinterTest extends \PHPUnit_Framework_TestCase
 {
@@ -37,9 +38,9 @@ class LinterTest extends \PHPUnit_Framework_TestCase
 
         $ruleset = new Ruleset();
         $ruleset
-            ->addSniff($ruleset::EVENT['PRE_PARSER'], new WhitespaceBeforeAfterExpression())
-            ->addSniff($ruleset::EVENT['PRE_PARSER'], new SimpleQuotesSniff())
-            ->addSniff($ruleset::EVENT['POST_PARSER'], new IncludeSniff())
+            ->addSniff(new WhitespaceBeforeAfterExpression())
+            ->addSniff(new SimpleQuotesSniff())
+            ->addSniff(new IncludeSniff())
         ;
 
         $report = $this->lint->run($file, $ruleset);
@@ -58,27 +59,39 @@ class LinterTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider dataConfigYml
      */
-    public function testConfigYml1($filename, $expectCount)
+    public function testConfigYml1($filename, $expectLoadingError, $expectCount = 0, $expectAddErrors = true, $expectAdded = 0)
     {
-        $file = __DIR__ . '/Fixtures/' . $filename;
-
+        $loader = new Loader(new FileLocator(__DIR__ . '/Fixtures/'));
         try {
-            $value = Yaml::parse(file_get_contents($file));
-        } catch (ParseException $e) {
-            $this->assertTrue(false, sprinft('Unable to parse the YAML string: %s', $e->getMessage()));
+            $value = $loader->load($filename);
+
+            $this->assertFalse($expectLoadingError);
+        } catch (\Exception $e) {
+            $this->assertEquals($expectLoadingError, $e->getMessage());
+
+            return;
         }
 
         $this->assertCount($expectCount, $value['ruleset']);
 
         $ruleset = new Ruleset();
         foreach ($value['ruleset'] as $rule) {
-            $this->assertContains($rule['type'], ['PRE_PARSER', 'POST_PARSER']);
+            try {
+                $ruleset->addSniff(new $rule['class']);
 
-            $ruleset->addSniff($ruleset::EVENT[$rule['type']], new $rule['class']);
+                $this->assertFalse($expectAddErrors);
+            } catch (\Exception $e) {;
+                $this->assertTrue($expectAddErrors);
+            }
         }
 
-        $sniffs = $ruleset->getSniffs();
-        $this->assertCount($expectCount, $sniffs);
+        $this->assertCount($expectAdded, $ruleset->getSniffs());
+
+        foreach ($value['ruleset'] as $rule) {
+            $ruleset->removeSniff($rule['class']);
+        }
+
+        $this->assertCount(0, $ruleset->getSniffs());
     }
 
     /**
@@ -126,7 +139,11 @@ class LinterTest extends \PHPUnit_Framework_TestCase
     public function dataConfigYml()
     {
         return [
-            ['config/twigcs_1.yml', 2],
+            ['config/twigcs_0.yml', 'File "config/twigcs_0.yml" not found.'],
+            ['config/twigcs_1.yml', false, 2, false, 2],
+            ['config/twigcs_2.yml', false, 1, true, 0],
+            ['config/twigcs_3.yml', 'Missing "class" key'],
+            ['config/twigcs_4.yml', 'Missing "ruleset" key'],
         ];
     }
 
@@ -179,7 +196,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
 
         $ruleset = new Ruleset();
         $ruleset
-            ->addSniff($ruleset::EVENT['PRE_PARSER'], $sniff)
+            ->addSniff($sniff)
         ;
 
         $report = $this->lint->run($file, $ruleset);

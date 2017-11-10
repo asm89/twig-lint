@@ -4,6 +4,8 @@ namespace Asm89\Twig\Lint\Sniffs;
 
 abstract class AbstractPreParserSniff implements PreParserSniffInterface
 {
+    protected $messages;
+
     protected $report;
 
     public function __construct()
@@ -31,13 +33,6 @@ abstract class AbstractPreParserSniff implements PreParserSniffInterface
         return $this;
     }
 
-    public function addMessage($messageType, $message, $token, $severity = null)
-    {
-        $this->getReport()->addMessage($messageType, $message, $token->getLine(), $token->getPosition(), $token->getFilename(), $severity);
-
-        return $this;
-    }
-
     public function getReport()
     {
         if (null === $this->report) {
@@ -45,5 +40,17 @@ abstract class AbstractPreParserSniff implements PreParserSniffInterface
         }
 
         return $this->report;
+    }
+
+    public function getType()
+    {
+        return $this::TYPE['PRE_PARSER'];
+    }
+
+    public function addMessage($messageType, $message, $token, $severity = null)
+    {
+        $this->getReport()->addMessage($messageType, $message, $token->getLine(), $token->getPosition(), $token->getFilename(), $severity);
+
+        return $this;
     }
 }

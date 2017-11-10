@@ -4,6 +4,8 @@ namespace Asm89\Twig\Lint\Sniffs;
 
 abstract class AbstractPostParserSniff implements PostParserSniffInterface
 {
+    protected $messages;
+
     protected $report;
 
     public function __construct()
@@ -33,6 +35,11 @@ abstract class AbstractPostParserSniff implements PostParserSniffInterface
         }
 
         return $this->report;
+    }
+
+    public function getType()
+    {
+        return $this::TYPE['POST_PARSER'];
     }
 
     public function addMessage($messageType, $message, $node, $severity = null)

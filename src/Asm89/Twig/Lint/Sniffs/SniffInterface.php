@@ -10,9 +10,16 @@ interface SniffInterface
 
     const SEVERITY_DEFAULT = 5;
 
+    const TYPE = [
+        'PRE_PARSER'    => 'lint.pre_parser',
+        'POST_PARSER'   => 'lint.post_parser',
+    ];
+
     public function enable($report);
 
     public function disable();
 
     public function getReport();
+
+    public function getType();
 }

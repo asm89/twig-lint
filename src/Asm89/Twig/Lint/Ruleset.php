@@ -8,68 +8,67 @@ use Asm89\Twig\Lint\Sniffs\SniffInterface;
 
 class Ruleset
 {
-    const EVENT = [
-        'PRE_PARSER'    => 'lint.pre_parser',
-        'POST_PARSER'   => 'lint.post_parser',
-    ];
-
     protected $sniffs;
 
     public function __construct()
     {
-        foreach (self::EVENT as $eventName => $eventSlug) {
-            $this->sniffs[$eventSlug] = [];
-        }
+        $this->sniffs = [];
     }
 
-    public function getSniffs($events = null)
+    public function getSniffs($types = null)
     {
-        if (null === $events) {
-            $events = array_values($this::EVENT);
+        if (null === $types) {
+            $types = array_values(SniffInterface::TYPE);
         }
 
-        if (null !== $events && !is_array($events)) {
-            $events = [$events];
+        if (null !== $types && !is_array($types)) {
+            $types = [$types];
         }
 
-        $sniffs = [];
-        foreach ($events as $eventSlug) {
-            $sniffs = array_merge($sniffs, $this->sniffs[$eventSlug]);
-        }
-
-        return $sniffs;
+        return array_filter($this->sniffs, function($sniff) use ($types) {
+            return in_array($sniff->getType(), $types);
+        });
     }
 
     public function addPreParserSniff(PreParserSniffInterface $sniff)
     {
-        $this->sniffs[self::EVENT['PRE_PARSER']][] = $sniff;
+        $this->sniffs[get_class($sniff)] = $sniff;
 
         return $this;
     }
 
     public function addPostParserSniff(PostParserSniffInterface $sniff)
     {
-        $this->sniffs[self::EVENT['POST_PARSER']][] = $sniff;
+        $this->sniffs[get_class($sniff)] = $sniff;
 
         return $this;
     }
 
-    public function addSniff($event, SniffInterface $sniff)
+    public function addSniff(SniffInterface $sniff)
     {
-        if (self::EVENT['PRE_PARSER'] === $event) {
+        if (SniffInterface::TYPE['PRE_PARSER'] === $sniff->getType()) {
             // Store this type of sniff locally.
             $this->addPreParserSniff($sniff);
 
             return $this;
         }
 
-        if (self::EVENT['POST_PARSER'] === $event) {
+        if (SniffInterface::TYPE['POST_PARSER'] === $sniff->getType()) {
             // Store this type of sniff locally.
             $this->addPostParserSniff($sniff);
 
             return $this;
         }
 
-        throw new \Exception('Unknown type of sniff "' . $event . '", expected one of: "' . implode(', ', array_values(self::EVENT)) . "'");
+        throw new \Exception('Unknown type of sniff "' . $sniff->getType() . '", expected one of: "' . implode(', ', array_values(SniffInterface::TYPE)) . "'");
+    }
+
+    public function removeSniff($sniffClass)
+    {
+        if (isset($this->sniffs[$sniffClass])) {
+            unset($this->sniffs[$sniffClass]);
+        }
+
+        return $this;
     }
 }
