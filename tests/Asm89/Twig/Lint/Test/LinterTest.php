@@ -59,7 +59,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider dataConfigYml
+     * @dataProvider dataConfigYml1
      */
     public function testConfigYml1($filename, $expectLoadingError, $expectCount = 0, $expectAddErrors = true, $expectAdded = 0)
     {
@@ -94,6 +94,37 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->assertCount(0, $ruleset->getSniffs());
+    }
+
+    /**
+     * @dataProvider dataConfigYml2
+     */
+    public function testConfigYml2($configFilename, $filename, $expectSeverity)
+    {
+        $loader = new Loader(new FileLocator(__DIR__ . '/Fixtures/'));
+        $value = $loader->load($configFilename);
+
+        $ruleset = new Ruleset();
+        foreach ($value['ruleset'] as $rule) {
+            try {
+                $sniffOptions = [];
+                if (isset($rule['options'])) {
+                    $sniffOptions = $rule['options'];
+                }
+
+                $ruleset->addSniff(new $rule['class']($sniffOptions));
+
+                $this->assertTrue(true);
+            } catch (\Exception $e) {
+                $this->assertTrue(false, sprintf('Unable to add sniff to the ruleset: "%s"', $e->getMessage()));
+            }
+        }
+
+        $report = $this->lint->run(__DIR__ . '/Fixtures/' . $filename, $ruleset);
+        $messages = $report->getMessages();
+        foreach ($messages as $message) {
+            $this->assertEquals($expectSeverity, $message[5]);
+        }
     }
 
     public function templateFixtures()
@@ -174,7 +205,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-    public function dataConfigYml()
+    public function dataConfigYml1()
     {
         return [
             ['config/twigcs_0.yml', 'File "config/twigcs_0.yml" not found.'],
@@ -184,6 +215,14 @@ class LinterTest extends \PHPUnit_Framework_TestCase
             ['config/twigcs_4.yml', 'Missing "ruleset" key'],
         ];
     }
+
+    public function dataConfigYml2()
+    {
+        return [
+            ['config/twigcs_1.yml', 'Linter/dump_function.twig', 10],
+        ];
+    }
+
 
     protected function checkGenericSniff($filename, $sniff, $expects)
     {

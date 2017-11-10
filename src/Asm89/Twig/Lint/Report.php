@@ -8,8 +8,6 @@ class Report
     const MESSAGE_TYPE_WARNING   = 1;
     const MESSAGE_TYPE_ERROR     = 2;
 
-    const SEVERITY_DEFAULT = 5;
-
     protected $messages;
 
     protected $totalNotices;
@@ -20,18 +18,14 @@ class Report
 
     public function __construct()
     {
-        $this->messages = [];
-        $this->totalNotices = 0;
-        $this->totalWarnings = 0;
-        $this->totalErrors = 0;
+        $this->messages       = [];
+        $this->totalNotices   = 0;
+        $this->totalWarnings  = 0;
+        $this->totalErrors    = 0;
     }
 
     public function addMessage($messageType, $message, $line, $position = null, $filename = null, $severity = null)
     {
-        if (!$severity) {
-            $severity = $this::SEVERITY_DEFAULT;
-        }
-
         // Update stats
         switch ($messageType) {
             case self::MESSAGE_TYPE_NOTICE:

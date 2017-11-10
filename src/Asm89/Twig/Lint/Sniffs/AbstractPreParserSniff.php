@@ -2,16 +2,16 @@
 
 namespace Asm89\Twig\Lint\Sniffs;
 
-abstract class AbstractPreParserSniff implements PreParserSniffInterface
+use Asm89\Twig\Lint\Tokenizer\Token;
+
+abstract class AbstractPreParserSniff extends AbstractSniff implements PreParserSniffInterface
 {
-    protected $messages;
-
-    protected $report;
-
-    public function __construct()
+    /**
+     * {@inheritDoc}
+     */
+    public function getType()
     {
-        $this->messages = [];
-        $this->report = null;
+        return $this::TYPE['PRE_PARSER'];
     }
 
     public function isTokenMatching($token, $type, $value = null)
@@ -19,37 +19,20 @@ abstract class AbstractPreParserSniff implements PreParserSniffInterface
         return $token->getType() === $type && (null === $value || (null !== $value && $token->getValue() === $value));
     }
 
-    public function enable($report)
+    public function addMessage($messageType, $message, Token $token, $severity = null)
     {
-        $this->report = $report;
-
-        return $this;
-    }
-
-    public function disable()
-    {
-        $this->report = null;
-
-        return $this;
-    }
-
-    public function getReport()
-    {
-        if (null === $this->report) {
-            throw new \Exception('Sniff is disabled!');
+        if (null === $severity) {
+            $severity = $this->options['severity'];
         }
 
-        return $this->report;
-    }
-
-    public function getType()
-    {
-        return $this::TYPE['PRE_PARSER'];
-    }
-
-    public function addMessage($messageType, $message, $token, $severity = null)
-    {
-        $this->getReport()->addMessage($messageType, $message, $token->getLine(), $token->getPosition(), $token->getFilename(), $severity);
+        $this->getReport()->addMessage(
+            $messageType,
+            $message,
+            $token->getLine(),
+            $token->getPosition(),
+            $token->getFilename(),
+            $severity
+        );
 
         return $this;
     }

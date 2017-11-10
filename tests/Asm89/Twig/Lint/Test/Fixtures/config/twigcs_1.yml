@@ -1,8 +1,9 @@
 ruleset:
   -
-    class: 'Asm89\Twig\Lint\Standards\Generic\Sniffs\WhitespaceBeforeAfterExpression'
-    parameters:
-      severity: 1
-      required_whitespace: 1
-  -
     class: 'Asm89\Twig\Lint\Standards\Generic\Sniffs\DumpSniff'
+    options:
+      severity: 10
+  -
+    class: 'Asm89\Twig\Lint\Standards\Generic\Sniffs\WhitespaceBeforeAfterExpression'
+    options:
+      severity: 10

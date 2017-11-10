@@ -57,7 +57,7 @@ class Loader extends BaseFileLoader
         try {
             return $parser->parse(file_get_contents($file));
         } catch (\Exception $e) {
-            throw new \Exception(sprintf('Error parsing YAML, invalid file "%s"', $path), 0, $e);
+            throw new \Exception(sprintf('Error parsing YAML, invalid file "%s"', $file), 0, $e);
         }
     }
 
