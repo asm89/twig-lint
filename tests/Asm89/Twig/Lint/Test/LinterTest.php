@@ -5,6 +5,7 @@ namespace Asm89\Twig\Lint\Test;
 use Asm89\Twig\Lint\Config\Loader;
 use Asm89\Twig\Lint\Linter;
 use Asm89\Twig\Lint\Ruleset;
+use Asm89\Twig\Lint\RulesetFactory;
 use Asm89\Twig\Lint\Sniffs\SniffInterface;
 use Asm89\Twig\Lint\StubbedEnvironment;
 use Asm89\Twig\Lint\Tokenizer\Tokenizer;
@@ -12,10 +13,17 @@ use Symfony\Component\Config\FileLocator;
 
 class LinterTest extends \PHPUnit_Framework_TestCase
 {
+    private $env;
+    private $lint;
+    private $workingDirectory;
+    private $rulesetFactory;
+
     public function setUp()
     {
         $this->env = new StubbedEnvironment();
         $this->lint = new Linter($this->env, new Tokenizer($this->env));
+        $this->workingDirectory = __DIR__ . '/Fixtures';
+        $this->rulesetFactory = new RulesetFactory();
     }
 
     public function testNewEngine()
@@ -63,7 +71,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
      */
     public function testConfigYml1($filename, $expectLoadingError, $expectCount = 0, $expectAddErrors = true, $expectAdded = 0)
     {
-        $loader = new Loader(new FileLocator(__DIR__ . '/Fixtures/'));
+        $loader = new Loader(new FileLocator(__DIR__ . '/Fixtures/config'));
         try {
             $value = $loader->load($filename);
 
@@ -101,26 +109,9 @@ class LinterTest extends \PHPUnit_Framework_TestCase
      */
     public function testConfigYml2($configFilename, $filename, $expectSeverity)
     {
-        $loader = new Loader(new FileLocator(__DIR__ . '/Fixtures/'));
-        $value = $loader->load($configFilename);
+        $ruleset = $this->rulesetFactory->createRulesetFromFile($configFilename, [$this->workingDirectory . '/config']);
 
-        $ruleset = new Ruleset();
-        foreach ($value['ruleset'] as $rule) {
-            try {
-                $sniffOptions = [];
-                if (isset($rule['options'])) {
-                    $sniffOptions = $rule['options'];
-                }
-
-                $ruleset->addSniff(new $rule['class']($sniffOptions));
-
-                $this->assertTrue(true);
-            } catch (\Exception $e) {
-                $this->assertTrue(false, sprintf('Unable to add sniff to the ruleset: "%s"', $e->getMessage()));
-            }
-        }
-
-        $report = $this->lint->run(__DIR__ . '/Fixtures/' . $filename, $ruleset);
+        $report = $this->lint->run($this->workingDirectory . '/' . $filename, $ruleset);
         $messages = $report->getMessages();
         foreach ($messages as $message) {
             $this->assertEquals($expectSeverity, $message[5]);
@@ -208,18 +199,18 @@ class LinterTest extends \PHPUnit_Framework_TestCase
     public function dataConfigYml1()
     {
         return [
-            ['config/twigcs_0.yml', 'File "config/twigcs_0.yml" not found.'],
-            ['config/twigcs_1.yml', false, 2, false, 2],
-            ['config/twigcs_2.yml', false, 1, true, 0],
-            ['config/twigcs_3.yml', 'Missing "class" key'],
-            ['config/twigcs_4.yml', 'Missing "ruleset" key'],
+            ['twigcs_0.yml', 'File "twigcs_0.yml" not found.'],
+            ['twigcs_1.yml', false, 2, false, 2],
+            ['twigcs_2.yml', false, 1, true, 0],
+            ['twigcs_3.yml', 'Missing "class" key'],
+            ['twigcs_4.yml', 'Missing "ruleset" key'],
         ];
     }
 
     public function dataConfigYml2()
     {
         return [
-            ['config/twigcs_1.yml', 'Linter/dump_function.twig', 10],
+            ['twigcs_1.yml', 'Linter/dump_function.twig', 10],
         ];
     }
 
