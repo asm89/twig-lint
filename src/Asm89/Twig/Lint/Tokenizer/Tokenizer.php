@@ -124,17 +124,17 @@ class Tokenizer implements TokenizerInterface
         array_pop($this->state);
     }
 
-    public function tokenize($code, $filename = null)
+    public function tokenize(\Twig_Source $source)
     {
         // Reset everything.
         $this->resetState();
 
-        $this->code = $code;
-        $this->end = strlen($code);
-        $this->filename = $filename;
+        $this->code = $source->getCode();
+        $this->end = strlen($this->code);
+        $this->filename = $source->getName();
 
         // Preflight source code for token positions.
-        $this->tokenPositions = $this->preflightSource($code);
+        $this->tokenPositions = $this->preflightSource($this->code);
         while ($this->cursor < $this->end) {
             $nextToken = $this->getTokenPosition();
 

@@ -54,27 +54,27 @@ class Linter
 
     public function processTemplate($file, $ruleset, $report)
     {
-        $template = [file_get_contents($file), $file];
+        $twigSource = new \Twig_Source(file_get_contents($file), basename($file), $file);
 
         try {
-            $this->env->parse($this->env->tokenize($template[0], $template[1]));
+            $this->env->parse($this->env->tokenize($twigSource));
         } catch (\Twig_Error $e) {
             $sourceContext = $e->getSourceContext();
 
-            $SniffViolation = new SniffViolation(
+            $sniffViolation = new SniffViolation(
                 SniffInterface::MESSAGE_TYPE_ERROR,
                 $e->getRawMessage(),
                 $e->getTemplateLine(),
                 $e->getSourceContext()->getName()
             );
-            $SniffViolation->setSeverity(SniffInterface::SEVERITY_MAX);
+            $sniffViolation->setSeverity(SniffInterface::SEVERITY_MAX);
 
-            $report->addMessage($SniffViolation);
+            $report->addMessage($sniffViolation);
 
             return false;
         }
 
-        $stream = $this->tokenizer->tokenize($template[0], $template[1]);
+        $stream = $this->tokenizer->tokenize($twigSource);
 
         $sniffs = $ruleset->getSniffs(SniffInterface::TYPE['PRE_PARSER']);
         foreach ($stream as $index => $token) {

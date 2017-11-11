@@ -39,7 +39,7 @@ class TwigCSCommand extends Command
                     'format',
                     '',
                     InputOption::VALUE_OPTIONAL,
-                    'full, csv',
+                    'Implemented formats are: full',
                     'full'
                 ),
                 new InputOption(
@@ -98,7 +98,7 @@ class TwigCSCommand extends Command
                 $message->getFilename(),
                 $message->getSeverity(),
             ];
-            $rows[] = [new TableCell($message->getMessage(), array('colspan' => 5))];
+            $rows[] = [new TableCell('<comment>' . $message->getMessage() . '</>', array('colspan' => 5))];
             $rows[] = new TableSeparator();
         }
 
