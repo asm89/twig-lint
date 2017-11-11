@@ -11,6 +11,13 @@
 
 namespace Asm89\Twig\Lint\Tokenizer;
 
+/**
+ * Represents a token from a twig template.
+ *
+ * This is inspired by \Twig_Token but this is not meant to be an exact match.
+ *
+ * @author Hussard <adrien.ricartnoblet@gmail.com>
+ */
 class Token
 {
     const EOF_TYPE = -1;

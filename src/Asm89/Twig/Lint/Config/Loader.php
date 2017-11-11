@@ -14,6 +14,11 @@ namespace Asm89\Twig\Lint\Config;
 use Symfony\Component\Config\Loader\FileLoader as BaseFileLoader;
 use Symfony\Component\Yaml\Parser;
 
+/**
+ * Load a twigcs.yml file and validate its content.
+ *
+ * @author Hussard <adrien.ricartnoblet@gmail.com>
+ */
 class Loader extends BaseFileLoader
 {
     /**

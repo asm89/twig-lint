@@ -29,6 +29,15 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 use Symfony\Component\Finder\Finder;
 
+/**
+ * TwigCS stands for "Twig Code Sniffer" and will check twig template againt all
+ * rules which have been defined in the twigcs.yml of your project.
+ *
+ * This is heavily inspired by the symfony lint command and PHP_CodeSniffer tool
+ * (https://github.com/squizlabs/PHP_CodeSniffer).
+ *
+ * @author Hussard <adrien.ricartnoblet@gmail.com>
+ */
 class TwigCSCommand extends Command
 {
     protected function configure()
@@ -59,9 +68,27 @@ class TwigCSCommand extends Command
                 ),
             ))
             ->addArgument('filename', InputArgument::OPTIONAL)
+            ->setHelp(<<<EOF
+The <info>%command.name%</info> will check twig templates against a set of rules defined in
+a "twigcs.yml".
+
+<info>php %command.full_name% filename</info>
+
+The command gets the contents of <comment>filename</comment> and outputs violations of the rules to stdout.
+
+<info>php %command.full_name% dirname</info>
+
+The command finds all twig templates in <comment>dirname</comment> and validates the syntax
+of each Twig templates.
+
+EOF
+            )
         ;
     }
 
+    /**
+     * @{inheritDoc}
+     */
     protected function execute(InputInterface $input, CliOutputInterface $output)
     {
         $twig       = new StubbedEnvironment(new \Twig_Loader_String());

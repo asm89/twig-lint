@@ -13,6 +13,17 @@ namespace Asm89\Twig\Lint\Sniffs;
 
 use Asm89\Twig\Lint\Report\SniffViolation;
 
+/**
+ * Base for all post-parser sniff.
+ *
+ * A post parser sniff should be useful to check actual values of twig functions, filters
+ * and tags such as: ensure that a given function has at least 3 arguments or if the template
+ * contains an {% include %} tag.
+ *
+ * Use `AbstractPreParserSniff` sniff if you want to check syntax and code formatting.
+ *
+ * @author Hussard <adrien.ricartnoblet@gmail.com>
+ */
 abstract class AbstractPostParserSniff extends AbstractSniff implements PostParserSniffInterface
 {
     /**
@@ -23,6 +34,16 @@ abstract class AbstractPostParserSniff extends AbstractSniff implements PostPars
         return $this::TYPE['POST_PARSER'];
     }
 
+    /**
+     * Adds a violation to the current report for the given node.
+     *
+     * @param int         $messageType
+     * @param string      $message
+     * @param \Twig_Node  $token
+     * @param int         $severity
+     *
+     * @return self
+     */
     public function addMessage($messageType, $message, \Twig_Node $node, $severity = null)
     {
         if (null === $severity) {

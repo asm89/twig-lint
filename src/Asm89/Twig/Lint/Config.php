@@ -13,13 +13,28 @@ namespace Asm89\Twig\Lint;
 
 use Symfony\Component\Finder\Finder;
 
+/**
+ * TwigCS configuration data.
+ *
+ * @author Hussard <adrien.ricartnoblet@gmail.com>
+ */
 class Config
 {
+    /**
+     * Default configuration.
+     *
+     * @var array
+     */
     public static $defaultConfig = array(
         'filename' => 'twigcs.yml',
         'pattern'  => '*.twig',
     );
 
+    /**
+     * Current configuration.
+     *
+     * @var array
+     */
     protected $config;
 
     public function __construct($config = array())
@@ -27,6 +42,14 @@ class Config
         $this->config = array_merge($this::$defaultConfig, $config);
     }
 
+    /**
+     * Find all files to process, based on a file or directory and exclude patterns.
+     *
+     * @param  string $fileOrDirectory a file or a directory.
+     * @param  array  $exclude         array of exclude patterns.
+     *
+     * @return array
+     */
     public function findFiles($fileOrDirectory, $exclude = null)
     {
         $files = [];

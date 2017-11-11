@@ -13,6 +13,11 @@ namespace Asm89\Twig\Lint\Sniffs;
 
 use Asm89\Twig\Lint\Report;
 
+/**
+ * Base for all sniff.
+ *
+ * @author Hussard <adrien.ricartnoblet@gmail.com>
+ */
 abstract class AbstractSniff implements SniffInterface
 {
     protected $options;

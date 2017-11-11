@@ -14,12 +14,20 @@ namespace Asm89\Twig\Lint;
 use Asm89\Twig\Lint\Config\Loader;
 use Symfony\Component\Config\FileLocator;
 
+/**
+ * Factory to help create set of rules.
+ *
+ * @author Hussard <adrien.ricartnoblet@gmail.com>
+ */
 class RulesetFactory
 {
-    public function __construct()
-    {
-    }
-
+    /**
+     * Create a new set of rule with the given $sniffs.
+     *
+     * @param  array  $sniffs
+     *
+     * @return Ruleset
+     */
     public function createRuleset(array $sniffs = array())
     {
         $ruleset = new Ruleset();
@@ -31,6 +39,14 @@ class RulesetFactory
         return $ruleset;
     }
 
+    /**
+     * Create a new set of rule from a given file.
+     *
+     * @param  string $file    Name of the file to load
+     * @param  array  $paths   Paths where to look for that file.
+     *
+     * @return Ruleset
+     */
     public function createRulesetFromFile($file, $paths)
     {
         $loader = new Loader(new FileLocator($paths));

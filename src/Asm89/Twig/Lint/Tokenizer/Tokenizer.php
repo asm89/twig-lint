@@ -11,6 +11,12 @@
 
 namespace Asm89\Twig\Lint\Tokenizer;
 
+/**
+ * This tokenizer is a retake on the Twig_Lexer that will tokenize a given template
+ * with
+ *
+ * @author Hussard <adrien.ricartnoblet@gmail.com>
+ */
 class Tokenizer implements TokenizerInterface
 {
     const STATE_DATA        = 0;

@@ -13,6 +13,11 @@ namespace Asm89\Twig\Lint\Report;
 
 use Asm89\Twig\Lint\Sniffs\SniffInterface;
 
+/**
+ * Wrapper class that represents a violation to a sniff with context.
+ *
+ * @author Hussard <adrien.ricartnoblet@gmail.com>
+ */
 class SniffViolation
 {
     /**
@@ -76,23 +81,21 @@ class SniffViolation
         $this->severity     = SniffInterface::SEVERITY_DEFAULT;
     }
 
-    public function setSniff(SniffInterface $sniff)
-    {
-        $this->sniff = $sniff;
-
-        return $this;
-    }
-
-    public function getSniff()
-    {
-        return $this->sniff;
-    }
-
+    /**
+     * Get the level of this violation.
+     *
+     * @return int
+     */
     public function getLevel()
     {
         return $this->level;
     }
 
+    /**
+     * Get a human-readable of the level of this violation.
+     *
+     * @return string
+     */
     public function getLevelAsString()
     {
         switch ($this->level) {
@@ -107,21 +110,43 @@ class SniffViolation
         throw new \Exception(sprintf('Unknown level "%s"', $this->level));
     }
 
+    /**
+     * Get the text message of this violation.
+     *
+     * @return string
+     */
     public function getMessage()
     {
         return $this->message;
     }
 
+    /**
+     * Get the line number where this violation occured.
+     *
+     * @return int
+     */
     public function getLine()
     {
         return $this->line;
     }
 
+    /**
+     * Get the filename (and path) where this violation occured.
+     *
+     * @return string
+     */
     public function getFilename()
     {
-        return $this->filename;
+        return (string) $this->filename;
     }
 
+    /**
+     * Set the position in the line where this violation occured.
+     *
+     * @param int $linePosition
+     *
+     * @return self
+     */
     public function setLinePosition($linePosition)
     {
         $this->linePosition = $linePosition;
@@ -129,11 +154,21 @@ class SniffViolation
         return $this;
     }
 
+    /**
+     * Get the position in the line, if any.
+     *
+     * @return int
+     */
     public function getLinePosition()
     {
         return $this->linePosition;
     }
 
+    /**
+     * Set the severity.
+     *
+     * @param int $severity
+     */
     public function setSeverity($severity)
     {
         $this->severity = $severity;
@@ -141,8 +176,35 @@ class SniffViolation
         return $this;
     }
 
+    /**
+     * Get the severity level.
+     *
+     * @return int
+     */
     public function getSeverity()
     {
-        return $this->severity;
+        return (int) $this->severity;
+    }
+
+    /**
+     * Set the sniff that was not met.
+     *
+     * @param SniffInterface $sniff
+     */
+    public function setSniff(SniffInterface $sniff)
+    {
+        $this->sniff = $sniff;
+
+        return $this;
+    }
+
+    /**
+     * Get the sniff that was not met.
+     *
+     * @return SniffInterface
+     */
+    public function getSniff()
+    {
+        return $this->sniff;
     }
 }

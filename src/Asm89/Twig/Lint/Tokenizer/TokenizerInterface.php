@@ -11,6 +11,11 @@
 
 namespace Asm89\Twig\Lint\Tokenizer;
 
+/**
+ * Interface for a tokenizer.
+ *
+ * @author Hussard <adrien.ricartnoblet@gmail.com>
+ */
 interface TokenizerInterface
 {
     public function tokenize(\Twig_Source $code);

@@ -13,6 +13,11 @@ namespace Asm89\Twig\Lint\Sniffs;
 
 use Asm89\Twig\Lint\Report;
 
+/**
+ * Interface for all sniffs.
+ *
+ * @author Hussard <adrien.ricartnoblet@gmail.com>
+ */
 interface SniffInterface
 {
     const MESSAGE_TYPE_NOTICE    = 0;

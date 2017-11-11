@@ -12,37 +12,58 @@
 namespace Asm89\Twig\Lint\Extension;
 
 use Asm89\Twig\Lint\NodeVisitor\SniffsNodeVisitor;
+use Asm89\Twig\Lint\Sniffs\PostParserSniffInterface;
 
+/**
+ * This extension is responsible of loading the sniffs into the twig environment.
+ *
+ * This class is only a bridge between the linter and the `SniffsNodeVisitor` that is
+ * actually doing the work when Twig parser is compiling a template.
+ *
+ * @author Hussard <adrien.ricartnoblet@gmail.com>
+ */
 class SniffsExtension extends \Twig_Extension_Core
 {
+    /**
+     * The actual node visitor.
+     *
+     * @var SniffsNodeVisitor
+     */
     protected $nodeVisitor;
 
-    protected $sniffs;
-
-    public function __construct($sniffs = [])
+    public function __construct()
     {
         $this->nodeVisitor = new SniffsNodeVisitor();
-        $this->sniffs = $sniffs;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function getNodeVisitors()
     {
         return [$this->nodeVisitor];
     }
 
-    public function addSniff($sniff)
+    /**
+     * Register a sniff in the node visitor.
+     *
+     * @param PostParserSniffInterface $sniff
+     */
+    public function addSniff(PostParserSniffInterface $sniff)
     {
         $this->nodeVisitor->addSniff($sniff);
 
         return $this;
     }
 
-    public function getSniffs()
-    {
-        return $this->nodeVisitor->getSniffs();
-    }
-
-    public function removeSniff($sniff)
+    /**
+     * Remove a sniff from the node visitor.
+     *
+     * @param  PostParserSniffInterface $sniff
+     *
+     * @return self
+     */
+    public function removeSniff(PostParserSniffInterface $sniff)
     {
         $this->nodeVisitor->removeSniff($sniff);
 

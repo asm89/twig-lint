@@ -13,6 +13,11 @@ namespace Asm89\Twig\Lint;
 
 use Asm89\Twig\Lint\Report\SniffViolation;
 
+/**
+ * Report contains all violations with stats.
+ *
+ * @author Hussard <adrien.ricartnoblet@gmail.com>
+ */
 class Report
 {
     const MESSAGE_TYPE_NOTICE    = 0;

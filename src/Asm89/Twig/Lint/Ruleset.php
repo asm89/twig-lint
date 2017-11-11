@@ -15,6 +15,11 @@ use Asm89\Twig\Lint\Sniffs\PostParserSniffInterface;
 use Asm89\Twig\Lint\Sniffs\PreParserSniffInterface;
 use Asm89\Twig\Lint\Sniffs\SniffInterface;
 
+/**
+ * Set of rules to be used by TwigCS and contains all sniffs (pre or post).
+ *
+ * @author Hussard <adrien.ricartnoblet@gmail.com>
+ */
 class Ruleset
 {
     protected $sniffs;
