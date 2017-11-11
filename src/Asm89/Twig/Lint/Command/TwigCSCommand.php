@@ -8,12 +8,16 @@ use Asm89\Twig\Lint\RulesetFactory;
 use Asm89\Twig\Lint\StubbedEnvironment;
 use Asm89\Twig\Lint\Output\OutputInterface;
 use Asm89\Twig\Lint\Tokenizer\Tokenizer;
+
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\TableSeparator;
+use Symfony\Component\Console\Helper\TableCell;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface as CliOutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+
 use Symfony\Component\Finder\Finder;
 
 class TwigCSCommand extends Command
@@ -28,7 +32,8 @@ class TwigCSCommand extends Command
                     'exclude',
                     '',
                     InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-                    'Excludes, based on regex, paths of files and folders from parsing'
+                    'Excludes, based on regex, paths of files and folders from parsing',
+                    array()
                 ),
                 new InputOption(
                     'format',
@@ -53,29 +58,26 @@ class TwigCSCommand extends Command
         $twig       = new StubbedEnvironment(new \Twig_Loader_String());
         $linter     = new Linter($twig, new Tokenizer($twig));
         $factory    = new RulesetFactory();
-        $currentDir = $input->getOption('working-dir') ?: getcwd();
         $exitCode   = 0;
 
-        $filename = $input->getArgument('filename');
-        if (!$filename) {
-            if (0 !== ftell(STDIN)) {
-                throw new \RuntimeException('Please provide a filename or pipe template content to stdin.');
-            }
+        $filename   = $input->getArgument('filename');
+        $exclude    = $input->getOption('exclude');
+        $format     = $input->getOption('format');
+        $currentDir = $input->getOption('working-dir') ?: getcwd();
 
-            while (!feof(STDIN)) {
-                $template .= fread(STDIN, 1024);
-            }
+        // Compute the config.
+        $config     = new Config();
 
-            // return $this->validateTemplate($twig, $output, $template);
-        }
-
-        $config = new Config();
-
+        // Get the rules to apply.
         $ruleset = $factory->createRulesetFromFile($config->get('filename'), $currentDir);
-        $report = $linter->run($config->findFiles($filename), $ruleset);
 
-        $this->display($input, $output, '', $report);
+        // Execute the linter.
+        $report = $linter->run($config->findFiles($filename, $exclude), $ruleset);
 
+        // Format the output.
+        $this->display($input, $output, $format, $report);
+
+        // Return a meaningful error code.
         if ($report->getTotalErrors()) {
             $exitCode = 1;
         }
@@ -87,18 +89,22 @@ class TwigCSCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        $rows = [];
+        foreach ($report->getMessages() as $message) {
+            $rows[] = [
+                $message->getLevelAsString(),
+                $message->getLine(),
+                $message->getLinePosition() ?: '-',
+                $message->getFilename(),
+                $message->getSeverity(),
+            ];
+            $rows[] = [new TableCell($message->getMessage(), array('colspan' => 5))];
+            $rows[] = new TableSeparator();
+        }
+
         $io->table(
-            array('Type', 'Message', 'Line', 'Position', 'File', 'Severity'),
-            array_map(function ($message) {
-                return [
-                    $message[0],
-                    strlen($message[1]) > 90 ? substr($message[1], 0, 90) . '...' : $message[1],
-                    $message[2],
-                    $message[3],
-                    basename(dirname($message[4])) . '/' . basename($message[4]),
-                    $message[5],
-                ];
-            }, $report->getMessages())
+            array('Level', 'Line', 'Position', 'File', 'Severity'),
+            $rows
         );
 
         $summaryString = sprintf('Files linted: %d, notices: %d, warnings: %d, errors: %d',

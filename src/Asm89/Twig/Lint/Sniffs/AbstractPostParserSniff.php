@@ -2,6 +2,8 @@
 
 namespace Asm89\Twig\Lint\Sniffs;
 
+use Asm89\Twig\Lint\Report\SniffViolation;
+
 abstract class AbstractPostParserSniff extends AbstractSniff implements PostParserSniffInterface
 {
     /**
@@ -18,13 +20,10 @@ abstract class AbstractPostParserSniff extends AbstractSniff implements PostPars
             $severity = $this->options['severity'];
         }
 
-        $this->getReport()->addMessage(
-            $messageType,
-            $message, $this->getTemplateLine($node),
-            null,
-            $this->getTemplateName($node),
-            $severity
-        );
+        $sniffViolation = new SniffViolation($messageType, $message, $this->getTemplateLine($node), $this->getTemplateName($node));
+        $sniffViolation->setSeverity($severity);
+
+        $this->getReport()->addMessage($sniffViolation);
 
         return $this;
     }

@@ -2,6 +2,8 @@
 
 namespace Asm89\Twig\Lint;
 
+use Asm89\Twig\Lint\Report\SniffViolation;
+
 class Report
 {
     const MESSAGE_TYPE_NOTICE    = 0;
@@ -24,10 +26,10 @@ class Report
         $this->totalErrors    = 0;
     }
 
-    public function addMessage($messageType, $message, $line, $position = null, $filename = null, $severity = null)
+    public function addMessage(SniffViolation $SniffViolation)
     {
         // Update stats
-        switch ($messageType) {
+        switch ($SniffViolation->getLevel()) {
             case self::MESSAGE_TYPE_NOTICE:
                 ++$this->totalNotices;
 
@@ -42,14 +44,7 @@ class Report
                 break;
         }
 
-        $this->messages[] = [
-            $messageType,
-            $message,
-            $line,
-            $position,
-            $filename,
-            $severity,
-        ];
+        $this->messages[] = $SniffViolation;
 
         return $this;
     }
@@ -62,13 +57,13 @@ class Report
     public function getTotalFiles()
     {
         return count(array_count_values(array_map(function ($message) {
-            return (string) $message[4];
+            return (string) $message->getFilename();
         }, $this->messages)));
     }
 
     public function getTotalMessages()
     {
-        return count($this->messages());
+        return count($this->messages);
     }
 
     public function getTotalNotices()

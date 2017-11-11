@@ -6,7 +6,7 @@ use Asm89\Twig\Lint\Report;
 
 interface SniffInterface
 {
-    const MESSAGE_TYPE_ALL       = 0;
+    const MESSAGE_TYPE_NOTICE    = 0;
     const MESSAGE_TYPE_WARNING   = 1;
     const MESSAGE_TYPE_ERROR     = 2;
 

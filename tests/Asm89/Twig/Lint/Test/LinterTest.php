@@ -46,7 +46,6 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         ;
 
         $report = $this->lint->run($file, $ruleset);
-
         $this->assertEquals($expectErrors, $report->getTotalErrors(), 'Number of errors');
         $this->assertEquals($expectWarnings, $report->getTotalWarnings(), 'Number of warnings');
         $this->assertEquals($expectFiles, $report->getTotalFiles(), 'Number of files');
@@ -54,8 +53,8 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         $messages = $report->getMessages();
         $lastMessage = $messages[count($messages) - 1];
 
-        $this->assertEquals($expectLastMessageLine, $lastMessage[2], 'Line number of the error');
-        $this->assertEquals($expectLastMessagePosition, $lastMessage[3], 'Line position of the error (if any)');
+        $this->assertEquals($expectLastMessageLine, $lastMessage->getLine(), 'Line number of the error');
+        $this->assertEquals($expectLastMessagePosition, $lastMessage->getLinePosition(), 'Line position of the error (if any)');
     }
 
     /**
@@ -114,7 +113,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         $report = $this->lint->run($this->workingDirectory . '/' . $filename, $ruleset);
         $messages = $report->getMessages();
         foreach ($messages as $message) {
-            $this->assertEquals($expectSeverity, $message[5]);
+            $this->assertEquals($expectSeverity, $message->getSeverity());
         }
     }
 
@@ -122,7 +121,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
     {
         return [
             ['Linter/error_1.twig', 0, 1, 1, 1, null],
-            ['mixed.twig', 4, 0, 1, 30, 55],
+            ['mixed.twig', 5, 0, 1, 30, 108],
         ];
     }
 
@@ -230,7 +229,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(count($expects), $report->getTotalWarnings() + $report->getTotalErrors());
         if ($expects) {
             $messageStrings = array_map(function ($message) {
-                return $message[1];
+                return $message->getMessage();
             }, $report->getMessages());
 
             foreach ($expects as $expect) {

@@ -2,6 +2,7 @@
 
 namespace Asm89\Twig\Lint\Sniffs;
 
+use Asm89\Twig\Lint\Report\SniffViolation;
 use Asm89\Twig\Lint\Tokenizer\Token;
 
 abstract class AbstractPreParserSniff extends AbstractSniff implements PreParserSniffInterface
@@ -25,14 +26,11 @@ abstract class AbstractPreParserSniff extends AbstractSniff implements PreParser
             $severity = $this->options['severity'];
         }
 
-        $this->getReport()->addMessage(
-            $messageType,
-            $message,
-            $token->getLine(),
-            $token->getPosition(),
-            $token->getFilename(),
-            $severity
-        );
+        $sniffViolation = new SniffViolation($messageType, $message, $token->getLine(), $token->getFilename());
+        $sniffViolation->setSeverity($severity);
+        $sniffViolation->setLinePosition($token->getPosition());
+
+        $this->getReport()->addMessage($sniffViolation);
 
         return $this;
     }

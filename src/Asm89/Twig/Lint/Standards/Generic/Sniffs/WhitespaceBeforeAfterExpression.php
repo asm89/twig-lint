@@ -26,7 +26,13 @@ class WhitespaceBeforeAfterExpression extends AbstractPreParserSniff
 
         if ($this->isTokenMatching($token, Token::PUNCTUATION_TYPE, '{')) {
             if ($this->isTokenMatching($tokens[$tokenPosition + 1], Token::WHITESPACE_TYPE)) {
-                $this->addMessage($this::MESSAGE_TYPE_WARNING, 'No whitespace allowed after "{" token', $token);
+                $this->addMessage($this::MESSAGE_TYPE_WARNING, 'No whitespace allowed AFTER "{" token', $token);
+            }
+        }
+
+        if ($this->isTokenMatching($token, Token::PUNCTUATION_TYPE, '}')) {
+            if ($this->isTokenMatching($tokens[$tokenPosition - 1], Token::WHITESPACE_TYPE)) {
+                $this->addMessage($this::MESSAGE_TYPE_WARNING, 'No whitespace allowed BEFORE "}" token', $token);
             }
         }
 

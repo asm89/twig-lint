@@ -2,6 +2,7 @@
 
 namespace Asm89\Twig\Lint;
 
+use Asm89\Twig\Lint\Report\SniffViolation;
 use Asm89\Twig\Lint\Tokenizer\TokenizerInterface;
 use Asm89\Twig\Lint\Sniffs\SniffInterface;
 use Asm89\Twig\Lint\Sniffs\PostParserSniffInterface;
@@ -58,18 +59,17 @@ class Linter
         try {
             $this->env->parse($this->env->tokenize($template[0], $template[1]));
         } catch (\Twig_Error $e) {
-            dump($e);
-            // $messageType, $message, $line, $position = null, $filename = null, $severity = null
             $sourceContext = $e->getSourceContext();
 
-            $report->addMessage(
+            $SniffViolation = new SniffViolation(
                 SniffInterface::MESSAGE_TYPE_ERROR,
                 $e->getRawMessage(),
                 $e->getTemplateLine(),
-                null,
-                $e->getSourceContext()->getName(),
-                SniffInterface::SEVERITY_MAX
+                $e->getSourceContext()->getName()
             );
+            $SniffViolation->setSeverity(SniffInterface::SEVERITY_MAX);
+
+            $report->addMessage($SniffViolation);
 
             return false;
         }
