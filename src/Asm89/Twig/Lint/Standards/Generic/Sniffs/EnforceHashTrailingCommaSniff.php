@@ -28,8 +28,11 @@ class EnforceHashTrailingCommaSniff extends AbstractPreParserSniff
             }
 
             if (1 < ($tokenPosition - $i) && !$this->isTokenMatching($tokens[$i], Token::PUNCTUATION_TYPE, ',')) {
-                $this->addMessage($this::MESSAGE_TYPE_WARNING, sprintf('Hash requires trailing comma after %s',
-                    (!$this->isTokenMatching($tokens[$i], Token::STRING_TYPE)) ? '\'' . $tokens[$i]->getValue() . '\'' : $tokens[$i]->getValue()), $tokens[$i]);
+                $this->addMessage(
+                    $this::MESSAGE_TYPE_WARNING,
+                    sprintf('Hash requires trailing comma after %s', $this->stringifyValue($tokens[$i])),
+                    $tokens[$i]
+                );
             }
         }
 

@@ -125,16 +125,16 @@ EOF
     {
         $io = new SymfonyStyle($input, $output);
 
-        $rows = [];
+        $rows = array();
         foreach ($report->getMessages() as $message) {
-            $rows[] = [
+            $rows[] = array(
                 $message->getLevelAsString(),
                 $message->getLine(),
                 $message->getLinePosition() ?: '-',
                 $message->getFilename(),
                 $message->getSeverity(),
-            ];
-            $rows[] = [new TableCell('<comment>' . $message->getMessage() . '</>', array('colspan' => 5))];
+            );
+            $rows[] = array(new TableCell('<comment>' . $message->getMessage() . '</>', array('colspan' => 5)));
             $rows[] = new TableSeparator();
         }
 
@@ -143,8 +143,13 @@ EOF
             $rows
         );
 
-        $summaryString = sprintf('Files linted: %d, notices: %d, warnings: %d, errors: %d',
-            $report->getTotalFiles(), $report->getTotalNotices(), $report->getTotalWarnings(), $report->getTotalErrors());
+        $summaryString = sprintf(
+            'Files linted: %d, notices: %d, warnings: %d, errors: %d',
+            $report->getTotalFiles(),
+            $report->getTotalNotices(),
+            $report->getTotalWarnings(),
+            $report->getTotalErrors()
+        );
 
         if (0 === $report->getTotalWarnings() && 0 === $report->getTotalErrors()) {
             $io->success($summaryString);

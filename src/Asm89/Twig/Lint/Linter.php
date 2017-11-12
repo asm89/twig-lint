@@ -107,7 +107,7 @@ class Linter
 
         $stream = $this->tokenizer->tokenize($twigSource);
 
-        $sniffs = $ruleset->getSniffs(SniffInterface::TYPE['PRE_PARSER']);
+        $sniffs = $ruleset->getSniffs(SniffInterface::TYPE_PRE_PARSER);
         foreach ($stream as $index => $token) {
             foreach ($sniffs as $sniff) {
                 $sniff->process($token, $index, $stream);

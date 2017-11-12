@@ -40,7 +40,7 @@ class SniffsNodeVisitor extends \Twig_BaseNodeVisitor implements \Twig_NodeVisit
 
     public function __construct()
     {
-        $this->sniffs = [];
+        $this->sniffs = array();
         $this->enabled = true;
     }
 

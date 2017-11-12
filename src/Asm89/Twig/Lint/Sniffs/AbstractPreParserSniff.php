@@ -31,7 +31,7 @@ abstract class AbstractPreParserSniff extends AbstractSniff implements PreParser
      */
     public function getType()
     {
-        return $this::TYPE['PRE_PARSER'];
+        return $this::TYPE_PRE_PARSER;
     }
 
     /**
@@ -71,5 +71,14 @@ abstract class AbstractPreParserSniff extends AbstractSniff implements PreParser
         $this->getReport()->addMessage($sniffViolation);
 
         return $this;
+    }
+
+    public function stringifyValue($token)
+    {
+        if ($token->getType() === Token::STRING_TYPE) {
+            return $token->getValue();
+        } else {
+            return '\'' . $token->getValue() . '\'';
+        }
     }
 }

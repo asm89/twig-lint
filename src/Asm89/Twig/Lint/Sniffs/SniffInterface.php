@@ -24,14 +24,12 @@ interface SniffInterface
     const MESSAGE_TYPE_WARNING   = 1;
     const MESSAGE_TYPE_ERROR     = 2;
 
-    const SEVERITY_MIN     = 0;
-    const SEVERITY_DEFAULT = 5;
-    const SEVERITY_MAX     = 10;
+    const SEVERITY_MIN           = 0;
+    const SEVERITY_DEFAULT       = 5;
+    const SEVERITY_MAX           = 10;
 
-    const TYPE = [
-        'PRE_PARSER'    => 'lint.pre_parser',
-        'POST_PARSER'   => 'lint.post_parser',
-    ];
+    const TYPE_PRE_PARSER        = 'lint.pre_parser';
+    const TYPE_POST_PARSER       = 'lint.post_parser';
 
     /**
      * Enable the sniff.

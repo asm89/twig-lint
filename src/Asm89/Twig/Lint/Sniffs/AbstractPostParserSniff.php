@@ -31,7 +31,7 @@ abstract class AbstractPostParserSniff extends AbstractSniff implements PostPars
      */
     public function getType()
     {
-        return $this::TYPE['POST_PARSER'];
+        return $this::TYPE_POST_PARSER;
     }
 
     /**
@@ -50,7 +50,12 @@ abstract class AbstractPostParserSniff extends AbstractSniff implements PostPars
             $severity = $this->options['severity'];
         }
 
-        $sniffViolation = new SniffViolation($messageType, $message, $this->getTemplateLine($node), $this->getTemplateName($node));
+        $sniffViolation = new SniffViolation(
+            $messageType,
+            $message,
+            $this->getTemplateLine($node),
+            $this->getTemplateName($node)
+        );
         $sniffViolation->setSeverity($severity);
 
         $this->getReport()->addMessage($sniffViolation);
@@ -90,20 +95,23 @@ abstract class AbstractPostParserSniff extends AbstractSniff implements PostPars
 
     public function isNodeMatching($node, $type, $name = null)
     {
-        $typeToClass = [
+        $typeToClass = array(
             'filter' => function ($node, $type, $name) {
-                return $node instanceof \Twig_Node_Expression_Filter && $name === $node->getNode($type)->getAttribute('value');
+                return $node instanceof \Twig_Node_Expression_Filter
+                    && $name === $node->getNode($type)->getAttribute('value');
             },
             'function' => function ($node, $type, $name) {
-                return $node instanceof \Twig_Node_Expression_Function && $name === $node->getAttribute('name');
+                return $node instanceof \Twig_Node_Expression_Function
+                    && $name === $node->getAttribute('name');
             },
             'include' => function ($node, $type, $name) {
                 return $node instanceof \Twig_Node_Include;
             },
             'tag' => function ($node, $type, $name) {
-                return $node->getNodeTag() === $name && $node->hasAttribute('name') && $name === $node->getAttribute('name');
+                return $node->getNodeTag() === $name && $node->hasAttribute('name')
+                    && $name === $node->getAttribute('name');
             },
-        ];
+        );
 
         if (!isset($typeToClass[$type])) {
             return false;
@@ -125,14 +133,15 @@ abstract class AbstractPostParserSniff extends AbstractSniff implements PostPars
         return (string) $value;
     }
 
-    public function stringifyNode($node) {
+    public function stringifyNode($node)
+    {
         $stringValue = '';
 
         if ($node instanceof \Twig_Node_Expression_GetAttr) {
             return $node->getNode('node')->getAttribute('name') . '.' . $this->stringifyNode($node->getNode('attribute'));
         } elseif ($node instanceof \Twig_Node_Expression_Binary_Concat) {
             return $this->stringifyNode($node->getNode('left')) . ' ~ ' . $this->stringifyNode($node->getNode('right'));
-        } elseif($node instanceof \Twig_Node_Expression_Constant) {
+        } elseif ($node instanceof \Twig_Node_Expression_Constant) {
             return $node->getAttribute('value');
         }
 

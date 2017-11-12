@@ -41,7 +41,7 @@ class Loader extends BaseFileLoader
         $content = $this->loadResource($path);
         if (!$content) {
             // Empty resource, always return an array.
-            $content = [];
+            $content = array();
         }
 
         return $this->validate($content, $path);
@@ -52,8 +52,9 @@ class Loader extends BaseFileLoader
      */
     public function supports($resource, $type = null)
     {
-        $validTypes = ['yaml', 'yml'];
-        return is_string($resource) && in_array(pathinfo($resource, PATHINFO_EXTENSION), $validTypes, true) && (!$type || in_array($type, $validTypes));
+        $validTypes = array('yaml', 'yml');
+        return is_string($resource) && in_array(pathinfo($resource, PATHINFO_EXTENSION), $validTypes, true)
+            && (!$type || in_array($type, $validTypes));
     }
 
     /**

@@ -27,7 +27,11 @@ class EnforceEOLatEOFSniff extends AbstractPreParserSniff
                 ++$i;
             }
 
-            $this->addMessage($this::MESSAGE_TYPE_WARNING, 'Extra EOL or whitespace (x' . ($i - 1) . ') after start of expression', $token);
+            $this->addMessage(
+                $this::MESSAGE_TYPE_WARNING,
+                'Extra EOL or whitespace (x' . ($i - 1) . ') after start of expression',
+                $token
+            );
         }
 
         if ($this->isTokenMatching($token, Token::EOF_TYPE)) {
@@ -36,7 +40,11 @@ class EnforceEOLatEOFSniff extends AbstractPreParserSniff
                 ++$i;
             }
 
-            $this->addMessage($this::MESSAGE_TYPE_WARNING, 'Extra EOL (x' . ($i - 1) . ') at end of file', $token);
+            $this->addMessage(
+                $this::MESSAGE_TYPE_WARNING,
+                'Extra EOL (x' . ($i - 1) . ') at end of file',
+                $token
+            );
         }
 
         return $token;

@@ -52,9 +52,9 @@ class Config
      */
     public function findFiles($fileOrDirectory, $exclude = null)
     {
-        $files = [];
+        $files = array();
         if (is_file($fileOrDirectory)) {
-            $files = [$fileOrDirectory];
+            $files = array($fileOrDirectory);
         } elseif (is_dir($fileOrDirectory)) {
             $files = Finder::create()->files()->in($fileOrDirectory)->name($this->config['pattern']);
             if (null !== $exclude) {

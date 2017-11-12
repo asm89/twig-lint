@@ -34,7 +34,7 @@ class Report
 
     public function __construct()
     {
-        $this->messages       = [];
+        $this->messages       = array();
         $this->totalNotices   = 0;
         $this->totalWarnings  = 0;
         $this->totalErrors    = 0;

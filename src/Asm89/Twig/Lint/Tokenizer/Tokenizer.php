@@ -41,7 +41,7 @@ class Tokenizer implements TokenizerInterface
     {
         $this->env = $env;
 
-        $this->regexes = [];
+        $this->regexes = array();
 
         $this->options = array_merge(array(
             'tag_comment' => array('{#', '#}'),
@@ -63,21 +63,21 @@ class Tokenizer implements TokenizerInterface
         $this->cursor = 0;
         $this->lineno = 1;
         $this->currentPosition = 0;
-        $this->tokens = [];
+        $this->tokens = array();
     }
 
     protected function preflightSource($code)
     {
-        $tokenPositions = [];
+        $tokenPositions = array();
         preg_match_all($this->regexes['tokens_start'], $code, $tokenPositions, PREG_OFFSET_CAPTURE);
 
-        $tokenPositionsReworked = [];
+        $tokenPositionsReworked = array();
         foreach ($tokenPositions[0] as $index => $tokenFullMatch) {
-            $tokenPositionsReworked[$index] = [
+            $tokenPositionsReworked[$index] = array(
                 'fullMatch' => $tokenFullMatch[0],
                 'position' => $tokenFullMatch[1],
                 'match' => $tokenPositions[1][$index][0],
-            ];
+            );
         }
 
         return $tokenPositionsReworked;
@@ -231,13 +231,11 @@ class Tokenizer implements TokenizerInterface
             $this->moveCursor($match[0]);
         } elseif (false !== strpos(self::PUNCTUATION, $this->code[$this->cursor])) {
             // punctuation
-
-            // opening bracket
             if (false !== strpos('([{', $this->code[$this->cursor])) {
+                // opening bracket
                 $this->brackets[] = array($this->code[$this->cursor], $this->lineno);
-            }
-            // closing bracket
-            elseif (false !== strpos(')]}', $this->code[$this->cursor])) {
+            } elseif (false !== strpos(')]}', $this->code[$this->cursor])) {
+                // closing bracket
                 if (empty($this->brackets)) {
                     throw new \Exception(sprintf('Unexpected "%s".', $this->code[$this->cursor]));
                 }
@@ -298,7 +296,7 @@ class Tokenizer implements TokenizerInterface
             }
 
             // Fixing token start among expressions and comments.
-            $nbTokenStart = preg_match_all($this->regexes['tokens_start'], $value);
+            $nbTokenStart = preg_match_all($this->regexes['tokens_start'], $value, $matches);
             if ($nbTokenStart) {
                 $this->moveCurrentPosition($nbTokenStart);
             }

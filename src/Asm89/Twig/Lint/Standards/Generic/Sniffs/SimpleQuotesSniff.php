@@ -24,7 +24,11 @@ class SimpleQuotesSniff extends AbstractPreParserSniff
         if ($this->isTokenMatching($token, Token::STRING_TYPE)) {
             $value = $token->getValue();
             if ($value[0] === '"' || $value[strlen($value) - 1] === '"') {
-                $this->addMessage($this::MESSAGE_TYPE_WARNING, sprintf('String \'%s\' does not require double quotes; use single quotes instead', $value), $token);
+                $this->addMessage(
+                    $this::MESSAGE_TYPE_WARNING,
+                    sprintf('String \'%s\' does not require double quotes; use single quotes instead', $value),
+                    $token
+                );
             }
         }
     }

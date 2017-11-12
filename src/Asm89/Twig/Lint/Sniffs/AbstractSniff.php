@@ -28,7 +28,7 @@ abstract class AbstractSniff implements SniffInterface
 
     public function __construct($options = array())
     {
-        $this->messages = [];
+        $this->messages = array();
         $this->report   = null;
 
         $this->options  = array_merge(array(

@@ -41,7 +41,7 @@ class SniffsExtension extends \Twig_Extension_Core
      */
     public function getNodeVisitors()
     {
-        return [$this->nodeVisitor];
+        return array($this->nodeVisitor);
     }
 
     /**

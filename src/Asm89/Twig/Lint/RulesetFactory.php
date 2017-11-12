@@ -52,9 +52,9 @@ class RulesetFactory
         $loader = new Loader(new FileLocator($paths));
         $value = $loader->load($file);
 
-        $sniffs = [];
+        $sniffs = array();
         foreach ($value['ruleset'] as $rule) {
-            $sniffOptions = [];
+            $sniffOptions = array();
             if (isset($rule['options'])) {
                 $sniffOptions = $rule['options'];
             }
@@ -64,6 +64,4 @@ class RulesetFactory
 
         return $this->createRuleset($sniffs);
     }
-
-
 }

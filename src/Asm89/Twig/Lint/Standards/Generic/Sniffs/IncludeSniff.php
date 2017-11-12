@@ -40,16 +40,31 @@ class IncludeSniff extends AbstractPostParserSniff
     {
         $arguments = $node->getNode('arguments');
         if (0 === count($arguments)) {
-            $this->addMessage($this::MESSAGE_TYPE_ERROR, 'Missing template (first argument) in include function call()', $node);
+            $this->addMessage(
+                $this::MESSAGE_TYPE_ERROR,
+                'Missing template (first argument) in include function call()',
+                $node
+            );
         } elseif (false == $arguments->getNode(0)->getAttribute('value')) {
-            $this->addMessage($this::MESSAGE_TYPE_ERROR, 'Invalid template (first argument, found "' . ($this->stringifyValue($arguments->getNode(0)->getAttribute('value'))) . '") in include function call()', $node);
+            $this->addMessage(
+                $this::MESSAGE_TYPE_ERROR,
+                sprintf(
+                    'Invalid template (first argument, found "%s") in include function call()',
+                    $this->stringifyValue($arguments->getNode(0)->getAttribute('value'))
+                ),
+                $node
+            );
         }
     }
 
     public function sniffTagTemplateFormat($node)
     {
         if (false === strpos($node->getNode('expr')->getAttribute('value'), '@')) {
-            $this->addMessage($this::MESSAGE_TYPE_WARNING, 'Prefer to use template notation with "@" in include tag', $node);
+            $this->addMessage(
+                $this::MESSAGE_TYPE_WARNING,
+                'Prefer to use template notation with "@" in include tag',
+                $node
+            );
         }
     }
 
@@ -58,7 +73,11 @@ class IncludeSniff extends AbstractPostParserSniff
         $arguments = $node->getNode('arguments');
         if (count($arguments) && $arguments->getNode(0)->getAttribute('value')) {
             if (false === strpos($arguments->getNode(0)->getAttribute('value'), '@')) {
-                $this->addMessage($this::MESSAGE_TYPE_WARNING, 'Prefer to use template notation with "@" in include function call()', $node);
+                $this->addMessage(
+                    $this::MESSAGE_TYPE_WARNING,
+                    'Prefer to use template notation with "@" in include function call()',
+                    $node
+                );
             }
         }
     }

@@ -26,20 +26,20 @@ class Ruleset
 
     public function __construct()
     {
-        $this->sniffs = [];
+        $this->sniffs = array();
     }
 
     public function getSniffs($types = null)
     {
         if (null === $types) {
-            $types = array_values(SniffInterface::TYPE);
+            $types = array(SniffInterface::TYPE_PRE_PARSER, SniffInterface::TYPE_POST_PARSER);
         }
 
         if (null !== $types && !is_array($types)) {
-            $types = [$types];
+            $types = array($types);
         }
 
-        return array_filter($this->sniffs, function($sniff) use ($types) {
+        return array_filter($this->sniffs, function ($sniff) use ($types) {
             return in_array($sniff->getType(), $types);
         });
     }
@@ -60,21 +60,21 @@ class Ruleset
 
     public function addSniff(SniffInterface $sniff)
     {
-        if (SniffInterface::TYPE['PRE_PARSER'] === $sniff->getType()) {
+        if (SniffInterface::TYPE_PRE_PARSER === $sniff->getType()) {
             // Store this type of sniff locally.
             $this->addPreParserSniff($sniff);
 
             return $this;
         }
 
-        if (SniffInterface::TYPE['POST_PARSER'] === $sniff->getType()) {
+        if (SniffInterface::TYPE_POST_PARSER === $sniff->getType()) {
             // Store this type of sniff locally.
             $this->addPostParserSniff($sniff);
 
             return $this;
         }
 
-        throw new \Exception('Unknown type of sniff "' . $sniff->getType() . '", expected one of: "' . implode(', ', array_values(SniffInterface::TYPE)) . "'");
+        throw new \Exception('Unknown type of sniff "' . $sniff->getType() . '", expected one of: "' . implode(', ', array(SniffInterface::TYPE_PRE_PARSER, SniffInterface::TYPE_POST_PARSER)) . "'");
     }
 
     public function removeSniff($sniffClass)
