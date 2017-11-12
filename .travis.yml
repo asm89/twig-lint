@@ -13,3 +13,8 @@ php:
 before_script: composer install
 
 script: phpunit
+
+matrix:
+  include: # https://github.com/travis-ci/travis-ci/issues/7712#issuecomment-300553336
+    - php: "5.3"
+      dist: precise
