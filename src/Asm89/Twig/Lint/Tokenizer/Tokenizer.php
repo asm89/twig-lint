@@ -64,6 +64,7 @@ class Tokenizer implements TokenizerInterface
         $this->lineno = 1;
         $this->currentPosition = 0;
         $this->tokens = array();
+        $this->state = array();
     }
 
     protected function preflightSource($code)
@@ -178,7 +179,7 @@ class Tokenizer implements TokenizerInterface
         }
 
         if (self::STATE_DATA !== $this->getState()) {
-            throw new \Exception("Error Processing Request", 1);
+            throw new \Exception('Error Processing Request', 1);
         }
 
         $this->pushToken(Token::EOF_TYPE);
@@ -189,6 +190,11 @@ class Tokenizer implements TokenizerInterface
     protected function lex($endType, $end, $endRegex)
     {
         preg_match($endRegex, $this->code, $match, PREG_OFFSET_CAPTURE, $this->cursor);
+        if (!isset($match[0])) {
+            // Should not happen, but in case it is;
+            throw new \Exception(sprintf('Unclosed "%s" in "%s" at line %d', $endType, $this->filename, $this->lineno));
+        }
+
         if ($match[0][1] === $this->cursor) {
             $this->pushToken($endType, $match[0][0]);
             $this->moveCursor($match[0][0]);
@@ -273,10 +279,10 @@ class Tokenizer implements TokenizerInterface
         $this->lex(Token::COMMENT_END_TYPE, $this->options['tag_comment'][1], $this->regexes['lex_comment']);
     }
 
-    protected function lexData($limit = null)
+    protected function lexData($limit = 0)
     {
         $nextToken = $this->getTokenPosition();
-        if (null === $limit) {
+        if (0 === $limit && null !== $nextToken) {
             $limit = $nextToken['position'];
         }
 
@@ -291,8 +297,8 @@ class Tokenizer implements TokenizerInterface
             $value = $match[0];
 
             // Stop if cursor reaches the next token start.
-            if ($limit <= ($this->cursor + strlen($value))) {
-                $value = substr($value, 0, $nextToken['position'] - $this->cursor);
+            if (0 !== $limit && $limit <= ($this->cursor + strlen($value))) {
+                $value = substr($value, 0, $limit - $this->cursor);
             }
 
             // Fixing token start among expressions and comments.

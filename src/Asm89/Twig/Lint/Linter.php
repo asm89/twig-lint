@@ -50,6 +50,10 @@ class Linter
             $files = array($files);
         }
 
+        if (empty($files)) {
+            throw new \Exception('No files to process, provide at least one file to be linted');
+        }
+
         $report = new Report();
         foreach ($ruleset->getSniffs() as $sniff) {
             if ($sniff instanceof PostParserSniffInterface) {
@@ -85,7 +89,7 @@ class Linter
      */
     public function processTemplate($file, $ruleset, $report)
     {
-        $twigSource = new \Twig_Source(file_get_contents($file), basename($file), $file);
+        $twigSource = new \Twig_Source(file_get_contents($file), $file, $file);
 
         try {
             $this->env->parse($this->env->tokenize($twigSource));
@@ -105,7 +109,21 @@ class Linter
             return false;
         }
 
-        $stream = $this->tokenizer->tokenize($twigSource);
+        try {
+            $stream = $this->tokenizer->tokenize($twigSource);
+        } catch (\Exception $e) {
+            $sniffViolation = new SniffViolation(
+                SniffInterface::MESSAGE_TYPE_ERROR,
+                sprintf('Unable to tokenize file "%s"', (string) $file),
+                '',
+                (string) $file
+            );
+            $sniffViolation->setSeverity(SniffInterface::SEVERITY_MAX);
+
+            $report->addMessage($sniffViolation);
+
+            return false;
+        }
 
         $sniffs = $ruleset->getSniffs(SniffInterface::TYPE_PRE_PARSER);
         foreach ($stream as $index => $token) {
