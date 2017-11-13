@@ -14,7 +14,7 @@ namespace Asm89\Twig\Lint\Standards\Generic\Sniffs;
 use Asm89\Twig\Lint\Tokenizer\Token;
 use Asm89\Twig\Lint\Sniffs\AbstractPreParserSniff;
 
-class WhitespaceBeforeAfterExpression extends AbstractPreParserSniff
+class WhitespaceBeforeAfterExpressionSniff extends AbstractPreParserSniff
 {
     /**
      * {@inheritdoc}

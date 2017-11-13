@@ -49,7 +49,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
 
         $ruleset = new Ruleset();
         $ruleset
-            ->addSniff(new \Asm89\Twig\Lint\Standards\Generic\Sniffs\WhitespaceBeforeAfterExpression())
+            ->addSniff(new \Asm89\Twig\Lint\Standards\Generic\Sniffs\WhitespaceBeforeAfterExpressionSniff())
             ->addSniff(new \Asm89\Twig\Lint\Standards\Generic\Sniffs\SimpleQuotesSniff())
             ->addSniff(new \Asm89\Twig\Lint\Standards\Generic\Sniffs\IncludeSniff())
         ;
