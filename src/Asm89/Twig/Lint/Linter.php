@@ -54,7 +54,21 @@ class Linter
             throw new \Exception('No files to process, provide at least one file to be linted');
         }
 
+        // setUp
         $report = new Report();
+        set_error_handler(function ($type, $msg) use ($report) {
+            if (E_USER_DEPRECATED === $type) {
+                $sniffViolation = new SniffViolation(
+                    SniffInterface::MESSAGE_TYPE_NOTICE,
+                    $msg,
+                    '',
+                    ''
+                );
+
+                $report->addMessage($sniffViolation);
+            }
+        });
+
         foreach ($ruleset->getSniffs() as $sniff) {
             if ($sniff instanceof PostParserSniffInterface) {
                 $this->sniffExtension->addSniff($sniff);
@@ -63,10 +77,13 @@ class Linter
             $sniff->enable($report);
         }
 
+        // Process
         foreach ($files as $file) {
             $this->processTemplate($file, $ruleset, $report);
         }
 
+        // tearDown
+        restore_error_handler();
         foreach ($ruleset->getSniffs() as $sniff) {
             if ($sniff instanceof PostParserSniffInterface) {
                 $this->sniffExtension->removeSniff($sniff);
@@ -91,6 +108,10 @@ class Linter
     {
         $twigSource = new \Twig_Source(file_get_contents($file), $file, $file);
 
+        // Add this file to the report.
+        $report->addFile($file);
+
+        // Tokenize + Parse.
         try {
             $this->env->parse($this->env->tokenize($twigSource));
         } catch (\Twig_Error $e) {
@@ -109,6 +130,7 @@ class Linter
             return false;
         }
 
+        // Tokenizer.
         try {
             $stream = $this->tokenizer->tokenize($twigSource);
         } catch (\Exception $e) {

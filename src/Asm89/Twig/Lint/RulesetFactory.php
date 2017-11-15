@@ -40,20 +40,18 @@ class RulesetFactory
     }
 
     /**
-     * Create a new set of rule from a given file.
+     * Create a new set of rule with the given $config.
      *
-     * @param  string $file    Name of the file to load
-     * @param  array  $paths   Paths where to look for that file.
+     * @param  Config  $config
      *
      * @return Ruleset
      */
-    public function createRulesetFromFile($file, $paths)
+    public function createRulesetFromConfig(Config $config)
     {
-        $loader = new Loader(new FileLocator($paths));
-        $value = $loader->load($file);
+        $rules = $config->get('ruleset');
 
         $sniffs = array();
-        foreach ($value['ruleset'] as $rule) {
+        foreach ($rules as $rule) {
             $sniffOptions = array();
             if (isset($rule['options'])) {
                 $sniffOptions = $rule['options'];

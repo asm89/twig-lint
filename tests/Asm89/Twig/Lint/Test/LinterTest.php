@@ -11,6 +11,7 @@
 
 namespace Asm89\Twig\Lint\Test;
 
+use Asm89\Twig\Lint\Config;
 use Asm89\Twig\Lint\Config\Loader;
 use Asm89\Twig\Lint\Linter;
 use Asm89\Twig\Lint\Ruleset;
@@ -18,6 +19,7 @@ use Asm89\Twig\Lint\RulesetFactory;
 use Asm89\Twig\Lint\Sniffs\SniffInterface;
 use Asm89\Twig\Lint\StubbedEnvironment;
 use Asm89\Twig\Lint\Tokenizer\Tokenizer;
+
 use Symfony\Component\Config\FileLocator;
 
 class LinterTest extends \PHPUnit_Framework_TestCase
@@ -30,7 +32,12 @@ class LinterTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->env = new StubbedEnvironment();
+        $this->env = new StubbedEnvironment(
+            $this->getMockBuilder('Twig_LoaderInterface')->getMock(),
+            array(
+                'stub_tags' => array('dump', 'meh', 'render', 'some_other_block', 'stylesheets', 'trans'),
+            )
+        );
         $this->lint = new Linter($this->env, new Tokenizer($this->env));
         $this->workingDirectory = __DIR__ . '/Fixtures';
         $this->rulesetFactory = new RulesetFactory();
@@ -189,7 +196,9 @@ class LinterTest extends \PHPUnit_Framework_TestCase
      */
     public function testConfigYml2($configFilename, $filename, $expectSeverity)
     {
-        $ruleset = $this->rulesetFactory->createRulesetFromFile($configFilename, array($this->workingDirectory . '/config'));
+        $loader        = new Loader(new FileLocator($this->workingDirectory . '/config'));
+        $config        = new Config(array('workingDirectory' => $this->workingDirectory . '/config'), $loader->load($configFilename));
+        $ruleset       = $this->rulesetFactory->createRulesetFromConfig($config);
 
         $report = $this->lint->run($this->workingDirectory . '/' . $filename, $ruleset);
         $messages = $report->getMessages();

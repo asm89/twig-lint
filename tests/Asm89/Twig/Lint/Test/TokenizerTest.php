@@ -11,7 +11,6 @@
 
 namespace Asm89\Twig\Lint\Test;
 
-use Asm89\Twig\Lint\StubbedEnvironment;
 use Asm89\Twig\Lint\Tokenizer\Tokenizer;
 use Asm89\Twig\Lint\Preprocessor\Token;
 use \Twig_Environment;

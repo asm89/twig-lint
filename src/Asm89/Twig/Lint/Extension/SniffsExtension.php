@@ -22,7 +22,7 @@ use Asm89\Twig\Lint\Sniffs\PostParserSniffInterface;
  *
  * @author Hussard <adrien.ricartnoblet@gmail.com>
  */
-class SniffsExtension extends \Twig_Extension_Core
+class SniffsExtension extends \Twig_Extension
 {
     /**
      * The actual node visitor.

@@ -26,6 +26,8 @@ class Report
 
     protected $messages;
 
+    protected $files;
+
     protected $totalNotices;
 
     protected $totalWarnings;
@@ -35,6 +37,7 @@ class Report
     public function __construct()
     {
         $this->messages       = array();
+        $this->files          = array();
         $this->totalNotices   = 0;
         $this->totalWarnings  = 0;
         $this->totalErrors    = 0;
@@ -68,11 +71,14 @@ class Report
         return $this->messages;
     }
 
+    public function addFile(\SplFileInfo $file)
+    {
+        $this->files[] = $file;
+    }
+
     public function getTotalFiles()
     {
-        return count(array_count_values(array_map(function ($message) {
-            return (string) $message->getFilename();
-        }, $this->messages)));
+        return count($this->files);
     }
 
     public function getTotalMessages()

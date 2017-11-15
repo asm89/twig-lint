@@ -26,8 +26,11 @@ class Config
      * @var array
      */
     public static $defaultConfig = array(
-        'filename' => 'twigcs.yml',
-        'pattern'  => '*.twig',
+        'exclude'          => array(),
+        'pattern'          => '*.twig',
+        'paths'            => array(),
+        'stub'             => array(),
+        'workingDirectory' => '',
     );
 
     /**
@@ -37,9 +40,17 @@ class Config
      */
     protected $config;
 
-    public function __construct($config = array())
+    /**
+     * Constructor.
+     */
+    public function __construct()
     {
-        $this->config = array_merge($this::$defaultConfig, $config);
+        $args = func_get_args();
+
+        $this->config = $this::$defaultConfig;
+        foreach ($args as $arg) {
+            $this->config = array_merge($this->config, $arg);
+        }
     }
 
     /**
@@ -50,26 +61,39 @@ class Config
      *
      * @return array
      */
-    public function findFiles($fileOrDirectory, $exclude = null)
+    public function findFiles($fileOrDirectory = null, $exclude = null)
     {
         $files = array();
+
         if (is_file($fileOrDirectory)) {
-            $files = array($fileOrDirectory);
-        } elseif (is_dir($fileOrDirectory)) {
-            $files = Finder::create()->files()->in($fileOrDirectory)->name($this->config['pattern']);
-            if (null !== $exclude) {
-                $files->filter(
-                    // pass in the list of excludes
-                    function (\SplFileInfo $file) use ($exclude) {
-                        foreach ($exclude as $excludeItem) {
-                            if (1 === preg_match('#' . $excludeItem . '#', $file->getRealPath())) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                );
-            }
+            // Early return with the given file. Should we exclude things to here?
+            return array($fileOrDirectory);
+        }
+
+        if (is_dir($fileOrDirectory)) {
+            $fileOrDirectory = array($fileOrDirectory);
+        }
+
+        if (!$fileOrDirectory) {
+            $fileOrDirectory = $this->get('paths');
+            $exclude = $this->get('exclude');
+        }
+
+        // Build the finder.
+        $files = Finder::create()
+            ->in($this->get('workingDirectory'))
+            ->name($this->config['pattern'])
+            ->files()
+        ;
+
+        // Include all matching paths.
+        foreach ($fileOrDirectory as $path) {
+            $files->path($path);
+        }
+
+        // Exclude all matching paths.
+        if ($exclude) {
+            $files->exclude($exclude);
         }
 
         return $files;

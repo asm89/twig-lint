@@ -15,6 +15,7 @@ use Asm89\Twig\Lint\Config;
 use Asm89\Twig\Lint\Linter;
 use Asm89\Twig\Lint\RulesetFactory;
 use Asm89\Twig\Lint\StubbedEnvironment;
+use Asm89\Twig\Lint\Config\Loader;
 use Asm89\Twig\Lint\Output\OutputInterface;
 use Asm89\Twig\Lint\Tokenizer\Tokenizer;
 
@@ -26,6 +27,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface as CliOutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Config\FileLocator;
 
 use Symfony\Component\Finder\Finder;
 
@@ -64,7 +66,8 @@ class TwigCSCommand extends Command
                     'working-dir',
                     '',
                     InputOption::VALUE_OPTIONAL,
-                    'Run as if this was started in <working-dir> instead of the current working directory'
+                    'Run as if this was started in <working-dir> instead of the current working directory',
+                    getcwd()
                 ),
             ))
             ->addArgument('filename', InputArgument::OPTIONAL)
@@ -91,24 +94,23 @@ EOF
      */
     protected function execute(InputInterface $input, CliOutputInterface $output)
     {
-        $twig       = new StubbedEnvironment(new \Twig_Loader_String());
-        $linter     = new Linter($twig, new Tokenizer($twig));
-        $factory    = new RulesetFactory();
-        $exitCode   = 0;
-
         $filename   = $input->getArgument('filename');
         $exclude    = $input->getOption('exclude');
         $format     = $input->getOption('format');
-        $currentDir = $input->getOption('working-dir') ?: getcwd();
+        $currentDir = $input->getOption('working-dir');
 
-        // Compute the config.
-        $config     = new Config();
+        $loader        = new Loader(new FileLocator($currentDir));
+        $config        = new Config(array('workingDirectory' => $currentDir), $loader->load('twigcs.yml'));
+        $twig          = new StubbedEnvironment(new \Twig_Loader_Array(), array('stub_tags' => $config->get('stub')));
+        $linter        = new Linter($twig, new Tokenizer($twig));
+        $factory       = new RulesetFactory();
+        $exitCode      = 0;
 
         // Get the rules to apply.
-        $ruleset = $factory->createRulesetFromFile($config->get('filename'), $currentDir);
+        $ruleset = $factory->createRulesetFromConfig($config);
 
         // Execute the linter.
-        $report = $linter->run($config->findFiles($filename, $exclude), $ruleset);
+        $report = $linter->run($config->findFiles(), $ruleset);
 
         // Format the output.
         $this->display($input, $output, $format, $report);
