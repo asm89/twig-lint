@@ -11,7 +11,7 @@
 
 namespace Asm89\Twig\Lint;
 
-use Asm89\Twig\Lint\Extension\StubbedCore;
+use Asm89\Twig\Lint\TokenParser\CatchAll;
 use Twig_LoaderInterface;
 
 /**
@@ -25,7 +25,7 @@ class StubbedEnvironment extends \Twig_Environment
     private $stubFilters;
     private $stubFunctions;
     private $stubTests;
-    protected $parsers;
+    private $stubCallable;
 
     /**
      * {@inheritDoc}
@@ -34,11 +34,18 @@ class StubbedEnvironment extends \Twig_Environment
     {
         parent::__construct($loader, $options);
 
-        $this->addExtension(new StubbedCore());
-        $this->initExtensions();
+        $this->stubFilters   = array();
+        $this->stubFunctions = array();
+        $this->stubTests     = array();
+        $this->stubCallable  = function () {
+            /* This will be used as stub filter, function or test */
+        };
 
-        $broker = new StubbedTokenParserBroker();
-        $this->parsers->addTokenParserBroker($broker);
+        if (isset($options['stub_tags'])) {
+            foreach ($options['stub_tags'] as $tag) {
+                $this->addTokenParser(new CatchAll($tag));
+            }
+        }
     }
 
     /**
@@ -47,7 +54,7 @@ class StubbedEnvironment extends \Twig_Environment
     public function getFilter($name)
     {
         if (!isset($this->stubFilters[$name])) {
-            $this->stubFilters[$name] = new \Twig_Filter_Function('stub');
+            $this->stubFilters[$name] = new \Twig_SimpleFilter('stub', $this->stubCallable);
         }
 
         return $this->stubFilters[$name];
@@ -59,7 +66,7 @@ class StubbedEnvironment extends \Twig_Environment
     public function getFunction($name)
     {
         if (!isset($this->stubFunctions[$name])) {
-            $this->stubFunctions[$name] = new \Twig_Function_Function('stub');
+            $this->stubFunctions[$name] = new \Twig_SimpleFunction('stub', $this->stubCallable);
         }
 
         return $this->stubFunctions[$name];
@@ -71,7 +78,7 @@ class StubbedEnvironment extends \Twig_Environment
     public function getTest($name)
     {
         if (!isset($this->stubTests[$name])) {
-            $this->stubTests[$name] = new \Twig_SimpleTest('stub', function(){});
+            $this->stubTests[$name] = new \Twig_SimpleTest('stub', $this->stubCallable);
         }
 
         return $this->stubTests[$name];
