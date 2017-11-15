@@ -108,8 +108,8 @@ abstract class AbstractPostParserSniff extends AbstractSniff implements PostPars
                 return $node instanceof \Twig_Node_Include;
             },
             'tag' => function ($node, $type, $name) {
-                return $node->getNodeTag() === $name && $node->hasAttribute('name')
-                    && $name === $node->getAttribute('name');
+                return $node->getNodeTag() === $name /*&& $node->hasAttribute('name')
+                    && $name === $node->getAttribute('name')*/;
             },
         );
 

@@ -20,20 +20,51 @@ use Asm89\Twig\Lint\Report;
  */
 abstract class AbstractSniff implements SniffInterface
 {
+    /**
+     * Default options for all sniffs.
+     *
+     * @var array
+     */
+    protected static $defaultOptions = array(
+        'severity' => self::SEVERITY_DEFAULT,
+    );
+
+    /**
+     * Computed options of this sniffs.
+     *
+     * @var array
+     */
     protected $options;
 
-    protected $messages;
-
+    /**
+     * When process is called, it will fill this report with the potential violations.
+     *
+     * @var Report
+     */
     protected $report;
 
+    /**
+     * Constructor.
+     *
+     * @param array $options    Each sniff can defined its options.
+     */
     public function __construct($options = array())
     {
         $this->messages = array();
         $this->report   = null;
+        $this->options  = array_merge(self::$defaultOptions, $options);
 
-        $this->options  = array_merge(array(
-            'severity' => $this::SEVERITY_DEFAULT,
-        ), $options);
+        $this->configure();
+    }
+
+    /**
+     * Configure this sniff based on its options.
+     *
+     * @return void
+     */
+    public function configure()
+    {
+        // Nothing.
     }
 
     /**

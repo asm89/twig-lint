@@ -1,0 +1,16 @@
+{% extends "@Acme/Some/base.html.twig" %}
+
+{% block body %}
+    <span>This should not be picked up: "Welcome!"</span>
+
+    <ul class="list list--dummy" {# Alert: "This should not be picked up either" #}>
+        {% for items in items if item.type is sameas('TYPE_1') %}
+            <li class="list-item">
+                {% set value = attribute(controllerValues, "some")|default("default") %}
+                {% if value == "some_value" %}
+                    {{ ("Value: " ~ controllerValue ~ ".")|trans({}, "front", lang) }}
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

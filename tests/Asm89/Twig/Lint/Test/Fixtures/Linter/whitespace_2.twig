@@ -1,0 +1,24 @@
+{% if not hash is defined %}
+    {% set hash = [
+        {some: 42}
+    ] %}
+{% endif %}
+
+{% render 'WebProfilerBundle:Exception:show' with {
+    'exception': collector.exception,
+    'format': 'html'
+} %}
+
+{% if someAttribute == true %}
+    {# Weird indent #}
+    {{ path('website_search', {   pattern: 'qwerty',
+        page: 2
+    }) }}
+{% endif %}
+
+{% embed 'AcmeBundle:Some:show.html.twig' with { some: true, none: false } %}
+{% endembed %}
+
+{% for item in [ 0..10 ] %}
+    {{ item }}
+{% endfor %}
