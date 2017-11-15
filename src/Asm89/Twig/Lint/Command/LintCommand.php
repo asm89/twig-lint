@@ -50,6 +50,13 @@ class LintCommand extends Command
                     InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
                     'Excludes, based on regex, paths of files and folders from parsing'
                 ),
+                new InputOption(
+                    'stub-tag',
+                    '',
+                    InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+                    'List of tags that the lint command has to provide stub for',
+                    array()
+                ),
                 new InputOption('only-print-errors', '', InputOption::VALUE_NONE),
                 new InputOption('summary', '', InputOption::VALUE_NONE)
             ))
@@ -81,12 +88,18 @@ EOF
 
     protected function execute(InputInterface $input, CliOutputInterface $output)
     {
-        $twig     = new StubbedEnvironment(new \Twig_Loader_String());
-        $template = null;
-        $filename = $input->getArgument('filename');
-        $exclude  = $input->getOption('exclude');
-        $summary  = $input->getOption('summary');
-        $output   = $this->getOutput($output, $input->getOption('format'));
+        $template    = null;
+        $filename    = $input->getArgument('filename');
+        $exclude     = $input->getOption('exclude');
+        $stubTagList = $input->getOption('stub-tag');
+        $summary     = $input->getOption('summary');
+        $output      = $this->getOutput($output, $input->getOption('format'));
+        $twig        = new StubbedEnvironment(
+            new \Twig_Loader_Array(),
+            array(
+                'stub_tags' => $stubTagList,
+            )
+        );
 
         if (!$filename) {
             if (0 !== ftell(STDIN)) {
@@ -151,7 +164,7 @@ EOF
     )
     {
         try {
-            $twig->parse($twig->tokenize($template, $file ? (string) $file : null));
+            $twig->parse($twig->tokenize(new \Twig_Source($template, $file ? (string) $file : null)));
             if (false === $onlyPrintErrors) {
                 $output->ok($template, $file);
             }

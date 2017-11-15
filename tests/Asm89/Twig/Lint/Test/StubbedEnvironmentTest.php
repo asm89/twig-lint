@@ -12,7 +12,7 @@
 namespace Asm89\Twig\Lint\Test;
 
 use Asm89\Twig\Lint\StubbedEnvironment;
-use Twig_Error;
+use \Twig_Error;
 
 /**
  * @author Alexander <iam.asm89@gmail.com>
@@ -23,21 +23,26 @@ class StubbedEnvironmentTest extends \PHPUnit_Framework_TestCase
 
     public function setup()
     {
-        $this->env = new StubbedEnvironment();
+        $this->env = new StubbedEnvironment(
+            $this->getMockBuilder('Twig_LoaderInterface')->getMock(),
+            array(
+                'stub_tags' => array('meh', 'render', 'some_other_block', 'stylesheets', 'trans'),
+            )
+        );
     }
 
     public function testGetFilterAlwaysReturnsAFilter()
     {
         $filter = $this->env->getFilter('foo');
 
-        $this->assertInstanceOf('Twig_Filter', $filter);
+        $this->assertInstanceOf('Twig_SimpleFilter', $filter);
     }
 
     public function testGetFunctionAlwaysReturnsAFunction()
     {
         $function = $this->env->getFunction('foo');
 
-        $this->assertInstanceOf('Twig_Function', $function);
+        $this->assertInstanceOf('Twig_SimpleFunction', $function);
     }
 
     /**
@@ -48,12 +53,12 @@ class StubbedEnvironmentTest extends \PHPUnit_Framework_TestCase
         $file     = __DIR__ . '/Fixtures/' . $filename;
         $template = file_get_contents($file);
         try {
-            $this->env->parse($this->env->tokenize($template, $file));
+            $this->env->parse($this->env->tokenize(new \Twig_Source($template, $file)));
         } catch (Twig_Error $exception) {
-            $this->assertTrue(false, "Was unable to parse the template.");
+            $this->assertTrue(false, sprintf('Was unable to parse the template: "%s"', $exception->getMessage()));
         }
 
-        $this->assertTrue(true, "Was able to parse the template.");
+        $this->assertTrue(true, 'Was able to parse the template.');
     }
 
     public function templateFixtures()
