@@ -291,10 +291,13 @@ class LinterTest extends \PHPUnit_Framework_TestCase
                 'A file must end with 1 blank line; found 0',
             )),
             array(true, 'Linter/eof_2.twig', $sniff, array(
-                'A file must end with 1 blank line; found 2',
+                'A file must end with 1 blank line; found 3',
             )),
             array(true, 'Linter/eof_3.twig', $sniff, array(
                 'A file must end with 1 blank line; found 0',
+            )),
+            array(true, 'Linter/empty.twig', $sniff, array(
+                'A file must end with 1 blank line; found 0'
             )),
         );
     }

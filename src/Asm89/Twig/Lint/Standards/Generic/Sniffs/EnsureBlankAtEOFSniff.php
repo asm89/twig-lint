@@ -24,22 +24,12 @@ class EnsureBlankAtEOFSniff extends AbstractPreParserSniff
      */
     public function process(Token $token, $tokenPosition, $tokens)
     {
-        // if ($this->isTokenMatching($token, Token::VAR_START_TYPE)) {
-        //     $i = 1;
-        //     while ($this->isTokenMatching($tokens[$tokenPosition + $i], Token::WHITESPACE_TYPE) || $this->isTokenMatching($tokens[$tokenPosition + $i], Token::EOL_TYPE)) {
-        //         ++$i;
-        //     }
-
-        //     $this->addMessage(
-        //         $this::MESSAGE_TYPE_WARNING,
-        //         'Extra EOL or whitespace (x' . ($i - 1) . ') after start of expression',
-        //         $token
-        //     );
-        // }
-
         if ($this->isTokenMatching($token, Token::EOF_TYPE)) {
             $i = 0;
-            while ($this->isTokenMatching($tokens[$tokenPosition - ($i + 1)], Token::EOL_TYPE)) {
+            while (
+                isset($tokens[$tokenPosition - ($i + 1)])
+                && $this->isTokenMatching($tokens[$tokenPosition - ($i + 1)], Token::EOL_TYPE)
+            ) {
                 ++$i;
             }
 
