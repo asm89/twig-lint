@@ -16,19 +16,15 @@ use Asm89\Twig\Lint\Linter;
 use Asm89\Twig\Lint\RulesetFactory;
 use Asm89\Twig\Lint\StubbedEnvironment;
 use Asm89\Twig\Lint\Config\Loader;
-use Asm89\Twig\Lint\Output\OutputInterface;
+use Asm89\Twig\Lint\Report\TextFormatter;
 use Asm89\Twig\Lint\Tokenizer\Tokenizer;
 
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\TableSeparator;
-use Symfony\Component\Console\Helper\TableCell;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface as CliOutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Config\FileLocator;
-
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -63,6 +59,20 @@ class TwigCSCommand extends Command
                     'full'
                 ),
                 new InputOption(
+                    'level',
+                    '',
+                    InputOption::VALUE_OPTIONAL,
+                    'Allowed values are: warning, error',
+                    'warning'
+                ),
+                new InputOption(
+                    'severity',
+                    '',
+                    InputOption::VALUE_OPTIONAL,
+                    'Allowed values are: 0 - 10',
+                    ''
+                ),
+                new InputOption(
                     'working-dir',
                     '',
                     InputOption::VALUE_OPTIONAL,
@@ -92,11 +102,13 @@ EOF
     /**
      * @{inheritDoc}
      */
-    protected function execute(InputInterface $input, CliOutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $filename   = $input->getArgument('filename');
         $exclude    = $input->getOption('exclude');
         $format     = $input->getOption('format');
+        $level      = $input->getOption('level');
+        $severity   = $input->getOption('severity');
         $currentDir = $input->getOption('working-dir');
 
         $loader        = new Loader(new FileLocator($currentDir));
@@ -104,6 +116,7 @@ EOF
         $twig          = new StubbedEnvironment(new \Twig_Loader_Array(), array('stub_tags' => $config->get('stub')));
         $linter        = new Linter($twig, new Tokenizer($twig));
         $factory       = new RulesetFactory();
+        $reporter      = $this->getReportFormatter($input, $output, $format);
         $exitCode      = 0;
 
         // Get the rules to apply.
@@ -113,7 +126,10 @@ EOF
         $report = $linter->run($config->findFiles(), $ruleset);
 
         // Format the output.
-        $this->display($input, $output, $format, $report);
+        $reporter->display($report, array(
+            'level'     => $level,
+            'severity'  => $severity,
+        ));
 
         // Return a meaningful error code.
         if ($report->getTotalErrors()) {
@@ -123,42 +139,13 @@ EOF
         return $exitCode;
     }
 
-    public function display($input, $output, $format, $report)
+    protected function getReportFormatter($input, $output, $format)
     {
-        $io = new SymfonyStyle($input, $output);
-
-        $rows = array();
-        foreach ($report->getMessages() as $message) {
-            $rows[] = array(
-                $message->getLevelAsString(),
-                $message->getLine(),
-                $message->getLinePosition() ?: '-',
-                $message->getFilename(),
-                $message->getSeverity(),
-            );
-            $rows[] = array(new TableCell('<comment>' . $message->getMessage() . '</>', array('colspan' => 5)));
-            $rows[] = new TableSeparator();
-        }
-
-        $io->table(
-            array('Level', 'Line', 'Position', 'File', 'Severity'),
-            $rows
-        );
-
-        $summaryString = sprintf(
-            'Files linted: %d, notices: %d, warnings: %d, errors: %d',
-            $report->getTotalFiles(),
-            $report->getTotalNotices(),
-            $report->getTotalWarnings(),
-            $report->getTotalErrors()
-        );
-
-        if (0 === $report->getTotalWarnings() && 0 === $report->getTotalErrors()) {
-            $io->success($summaryString);
-        } elseif (0 < $report->getTotalWarnings() && 0 === $report->getTotalErrors()) {
-            $io->warning($summaryString);
-        } else {
-            $io->error($summaryString);
+        switch ($format) {
+            case 'full':
+                return new TextFormatter($input, $output);
+            default:
+                throw new \Exception(sprintf('Unknown format "%s"', $format));
         }
     }
 }

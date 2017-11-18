@@ -111,6 +111,25 @@ class SniffViolation
     }
 
     /**
+     * Get the integer value for a given string $level.
+     *
+     * @return int
+     */
+    public static function getLevelAsInt($level)
+    {
+        switch (strtoupper($level)) {
+            case 'NOTICE':
+                return SniffInterface::MESSAGE_TYPE_NOTICE;
+            case 'WARNING':
+                return SniffInterface::MESSAGE_TYPE_WARNING;
+            case 'ERROR':
+                return SniffInterface::MESSAGE_TYPE_ERROR;
+        }
+
+        throw new \Exception(sprintf('Unknown level "%s"', $level));
+    }
+
+    /**
      * Get the text message of this violation.
      *
      * @return string

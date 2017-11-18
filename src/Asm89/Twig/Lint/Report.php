@@ -66,14 +66,40 @@ class Report
         return $this;
     }
 
-    public function getMessages()
+    public function getMessages($filters = array())
     {
-        return $this->messages;
+        if (!$filters) {
+            // Return all messages, without filtering.
+            return $this->messages;
+        }
+
+        return array_filter($this->messages, function ($message) use ($filters) {
+            $fileFilter = $levelFilter = $severityFilter = true;
+
+            if (isset($filters['file']) && $filters['file']) {
+                $fileFilter = (string) $message->getFilename() === (string) $filters['file'];
+            }
+
+            if (isset($filters['level']) && $filters['level']) {
+                $levelFilter = $message->getLevel() >= $message::getLevelAsInt($filters['level']);
+            }
+
+            if (isset($filters['severity']) && $filters['severity']) {
+                $severityFilter = $message->getSeverity() >= $filters['severity'];
+            }
+
+            return $fileFilter && $levelFilter && $severityFilter;
+        });
     }
 
     public function addFile(\SplFileInfo $file)
     {
         $this->files[] = $file;
+    }
+
+    public function getFiles()
+    {
+        return $this->files;
     }
 
     public function getTotalFiles()

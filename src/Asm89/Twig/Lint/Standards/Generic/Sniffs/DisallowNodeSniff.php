@@ -34,7 +34,7 @@ class DisallowNodeSniff extends AbstractPostParserSniff
 
             if ($this->isNodeMatching($node, $search['type'], $name)) {
                 $this->addMessage(
-                    $this::MESSAGE_TYPE_ERROR,
+                    $this::MESSAGE_TYPE_WARNING,
                     sprintf(
                         isset($search['message']) ? $search['message'] : 'Call to %s %s() must be removed',
                         $search['type'],
