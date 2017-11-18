@@ -39,17 +39,18 @@ class EnsureHashKeyQuotesSniff extends AbstractPreParserSniff
                 !$this->isTokenMatching($tokens[$j], Token::WHITESPACE_TYPE)
                 && !$this->isTokenMatching($tokens[$j], Token::EOL_TYPE)
             ) {
-                if ($this->isTokenMatching($tokens[$j], Token::PUNCTUATION_TYPE, '(')) {
-                    // Ignore keys that are complex expressions.
-                    continue;
+                $keyTokens = [];
+                while (!$this->isTokenMatching($tokens[$j], Token::PUNCTUATION_TYPE, ':')) {
+                    $keyTokens[] = $tokens[$j];
+                    ++$j;
                 }
 
                 // Not a string with quotes ?
-                if (!$this->isTokenMatching($tokens[$j], Token::STRING_TYPE)) {
+                if (1 === count($keyTokens) && !$this->isTokenMatching($keyTokens[0], Token::STRING_TYPE)) {
                     $this->addMessage(
                         $this::MESSAGE_TYPE_WARNING,
-                        sprintf('Hash key \'%s\' requires quotes; use single quotes', $tokens[$j]->getValue()),
-                        $tokens[$j]
+                        sprintf('Hash key \'%s\' requires quotes; use single quotes', $keyTokens[0]->getValue()),
+                        $keyTokens[0]
                     );
                 }
 

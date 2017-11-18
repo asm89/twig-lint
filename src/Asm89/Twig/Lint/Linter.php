@@ -148,8 +148,8 @@ class Linter
         }
 
         $sniffs = $ruleset->getSniffs(SniffInterface::TYPE_PRE_PARSER);
-        foreach ($stream as $index => $token) {
-            foreach ($sniffs as $sniff) {
+        foreach ($sniffs as $sniff) {
+            foreach ($stream as $index => $token) {
                 $sniff->process($token, $index, $stream);
             }
         }
