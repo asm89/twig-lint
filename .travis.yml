@@ -14,7 +14,7 @@ matrix:
     fast_finish: true
     include:
           # Minimum supported PHP and Symfony version
-        - php: 5.4
+        - php: 5.3
           env: DEPENDENCIES="minimun" COVERAGE=true TEST_COMMAND="composer test-ci"
 
           # Test the latest stable release
