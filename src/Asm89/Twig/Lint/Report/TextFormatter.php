@@ -43,9 +43,12 @@ class TextFormatter implements ReportFormatterInterface
      *
      * @param SymfonyStyle $output
      */
-    public function __construct($input, $output)
+    public function __construct($input, $output, $options = array())
     {
         $this->io = new SymfonyStyle($input, $output);
+        $this->options = array_merge(array(
+            'explain' => false,
+        ), $options);
     }
 
     /**
@@ -53,6 +56,8 @@ class TextFormatter implements ReportFormatterInterface
      */
     public function display(Report $report, array $options = array())
     {
+        $options = array_merge($this->options, $options);
+
         foreach ($report->getFiles() as $file) {
             $fileMessages = $report->getMessages(array(
                 'file'      => $file,
@@ -60,41 +65,45 @@ class TextFormatter implements ReportFormatterInterface
                 'severity'  => isset($options['severity']) ? $options['severity'] : null,
             ));
 
-            $this->io->text((count($fileMessages) > 0 ? '<error>KO</>': '<info>OK</>') . ' ' . $file);
+            $this->io->text((count($fileMessages) > 0 ? '<error>KO</>': '<info>OK</>') . ' ' . $file->getRelativePathname());
 
-            $rows = array();
-            foreach ($fileMessages as $message) {
-                $lines = $this->getContext(file_get_contents($file), $message->getLine(), $this::ERROR_CONTEXT_LIMIT);
+            if ($options['explain']) {
+                $rows = array();
+                foreach ($fileMessages as $message) {
+                    $lines = $this->getContext(file_get_contents($file), $message->getLine(), $this::ERROR_CONTEXT_LIMIT);
 
-                $formattedText = [];
-                foreach ($lines as $no => $code) {
-                    $formattedText[] = sprintf($this::ERROR_LINE_FORMAT, $no, wordwrap($code, $this::ERROR_LINE_WIDTH));
+                    $formattedText = [];
+                    foreach ($lines as $no => $code) {
+                        $formattedText[] = sprintf($this::ERROR_LINE_FORMAT, $no, wordwrap($code, $this::ERROR_LINE_WIDTH));
 
-                    if ($no === $message->getLine()) {
-                        $formattedText[] = sprintf(
-                            '<error>' . $this::ERROR_LINE_FORMAT . '</>',
-                            $this::ERROR_CURSOR_CHAR,
-                            wordwrap($message->getMessage(), $this::ERROR_LINE_WIDTH)
-                        );
+                        if ($no === $message->getLine()) {
+                            $formattedText[] = sprintf(
+                                '<error>' . $this::ERROR_LINE_FORMAT . '</>',
+                                $this::ERROR_CURSOR_CHAR,
+                                wordwrap($message->getMessage(), $this::ERROR_LINE_WIDTH)
+                            );
+                        }
                     }
+
+                    $rows[] = array(
+                        new TableCell('<comment>' . $message->getLevelAsString() . '</>', array('rowspan' => 2)),
+                        implode("\n", $formattedText),
+                    );
+                    $rows[] = new TableSeparator();
                 }
 
-                $rows[] = array(
-                    new TableCell('<comment>' . $message->getLevelAsString() . '</>', array('rowspan' => 2)),
-                    implode("\n", $formattedText),
-                );
-                $rows[] = new TableSeparator();
+                $this->io->table(array(), $rows);
             }
-
-            $this->io->table(array(), $rows);
         }
 
         $summaryString = sprintf(
-            'Files linted: %d, notices: %d, warnings: %d, errors: %d',
+            'Files linted: %d, notices: %d, warnings: %d, errors: %d; lint done in %dms / %s',
             $report->getTotalFiles(),
             $report->getTotalNotices(),
             $report->getTotalWarnings(),
-            $report->getTotalErrors()
+            $report->getTotalErrors(),
+            $report->getSummary()->getDuration(),
+            $this->formatMemory($report->getSummary()->getMemory())
         );
 
         if (0 === $report->getTotalWarnings() && 0 === $report->getTotalErrors()) {
@@ -138,4 +147,16 @@ class TextFormatter implements ReportFormatterInterface
 
         return $result;
     }
+
+    protected function formatMemory($size, $precision = 2) {
+        $units = array('B','kB','MB','GB','TB','PB','EB','ZB','YB');
+        $step = 1024;
+        $i = 0;
+        while (($size / $step) >= 1) {
+            $size = $size / $step;
+            $i++;
+        }
+        return round($size, [0,0,1,2,2,3,3,4,4][$i]) . $units[$i];
+    }
+
 }

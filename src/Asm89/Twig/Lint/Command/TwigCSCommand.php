@@ -143,6 +143,8 @@ EOF
     {
         switch ($format) {
             case 'full':
+                return new TextFormatter($input, $output, array('explain' => true));
+            case 'text':
                 return new TextFormatter($input, $output);
             default:
                 throw new \Exception(sprintf('Unknown format "%s"', $format));

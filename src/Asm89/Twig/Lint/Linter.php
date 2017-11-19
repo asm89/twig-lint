@@ -11,10 +11,13 @@
 
 namespace Asm89\Twig\Lint;
 
+use Asm89\Twig\Lint\Report\ReportWatch;
 use Asm89\Twig\Lint\Report\SniffViolation;
 use Asm89\Twig\Lint\Tokenizer\TokenizerInterface;
 use Asm89\Twig\Lint\Sniffs\SniffInterface;
 use Asm89\Twig\Lint\Sniffs\PostParserSniffInterface;
+
+use Symfony\Component\Stopwatch\Stopwatch;
 
 /**
  * Linter is the main class and will process twig files against a set of rules.
@@ -55,6 +58,8 @@ class Linter
         }
 
         // setUp
+        $stopwatch = new Stopwatch();
+
         $report = new Report();
         set_error_handler(function ($type, $msg) use ($report) {
             if (E_USER_DEPRECATED === $type) {
@@ -77,9 +82,15 @@ class Linter
             $sniff->enable($report);
         }
 
+        $stopwatch->start('lint');
+
         // Process
         foreach ($files as $file) {
             $this->processTemplate($file, $ruleset, $report);
+            $stopwatch->lap('lint');
+
+            // Add this file to the report.
+            $report->addFile($file);
         }
 
         // tearDown
@@ -91,6 +102,10 @@ class Linter
 
             $sniff->disable();
         }
+
+        $report->setSummary(
+            new ReportWatch($stopwatch->getEvent('lint')->getDuration(), $stopwatch->getEvent('lint')->getMemory())
+        );
 
         return $report;
     }
@@ -107,9 +122,6 @@ class Linter
     public function processTemplate($file, $ruleset, $report)
     {
         $twigSource = new \Twig_Source(file_get_contents($file), $file, $file);
-
-        // Add this file to the report.
-        $report->addFile($file);
 
         // Tokenize + Parse.
         try {

@@ -43,6 +43,18 @@ class Report
         $this->totalErrors    = 0;
     }
 
+    public function setSummary($summary)
+    {
+        $this->summary = $summary;
+
+        return $this;
+    }
+
+    public function getSummary()
+    {
+        return $this->summary;
+    }
+
     public function addMessage(SniffViolation $SniffViolation)
     {
         // Update stats
