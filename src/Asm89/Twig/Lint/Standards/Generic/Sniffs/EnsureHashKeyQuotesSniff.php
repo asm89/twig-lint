@@ -35,15 +35,17 @@ class EnsureHashKeyQuotesSniff extends AbstractPreParserSniff
 
         $j = $startPosition + 1;
         while ($j < $endPosition) {
+
             if (
                 !$this->isTokenMatching($tokens[$j], Token::WHITESPACE_TYPE)
                 && !$this->isTokenMatching($tokens[$j], Token::EOL_TYPE)
             ) {
                 $keyTokens = [];
-                while (!$this->isTokenMatching($tokens[$j], Token::PUNCTUATION_TYPE, ':')) {
+                while (!$this->isTokenMatching($tokens[$j], Token::PUNCTUATION_TYPE, ':') && $j < $endPosition) {
                     $keyTokens[] = $tokens[$j];
                     ++$j;
                 }
+
 
                 // Not a string with quotes ?
                 if (1 === count($keyTokens) && !$this->isTokenMatching($keyTokens[0], Token::STRING_TYPE)) {

@@ -211,7 +211,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
     {
         return array(
             array('Linter/error_1.twig', 0, 1, 1, 1, null),
-            array('mixed.twig', 1, 1, 1, 1, 11),
+            array('mixed.twig', 2, 0, 1, 1, 11),
         );
     }
 
