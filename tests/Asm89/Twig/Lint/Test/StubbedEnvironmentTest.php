@@ -12,13 +12,17 @@
 namespace Asm89\Twig\Lint\Test;
 
 use Asm89\Twig\Lint\StubbedEnvironment;
+use PHPUnit\Framework\TestCase;
 use Twig_Error;
 
 /**
  * @author Alexander <iam.asm89@gmail.com>
  */
-class StubbedEnvironmentTest extends \PHPUnit_Framework_TestCase
+class StubbedEnvironmentTest extends TestCase
 {
+    /**
+     * @var StubbedEnvironment
+     */
     private $env;
 
     public function setup()
