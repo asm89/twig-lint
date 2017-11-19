@@ -35,12 +35,11 @@ class EnsureHashKeyQuotesSniff extends AbstractPreParserSniff
 
         $j = $startPosition + 1;
         while ($j < $endPosition) {
-
             if (
                 !$this->isTokenMatching($tokens[$j], Token::WHITESPACE_TYPE)
                 && !$this->isTokenMatching($tokens[$j], Token::EOL_TYPE)
             ) {
-                $keyTokens = [];
+                $keyTokens = array();
                 while (!$this->isTokenMatching($tokens[$j], Token::PUNCTUATION_TYPE, ':') && $j < $endPosition) {
                     $keyTokens[] = $tokens[$j];
                     ++$j;

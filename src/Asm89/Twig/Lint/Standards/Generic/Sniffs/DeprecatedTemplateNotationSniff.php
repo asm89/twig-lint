@@ -78,6 +78,4 @@ class DeprecatedTemplateNotationSniff extends AbstractPostParserSniff
             );
         }
     }
-
-
 }

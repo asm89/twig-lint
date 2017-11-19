@@ -72,7 +72,7 @@ class TextFormatter implements ReportFormatterInterface
                 foreach ($fileMessages as $message) {
                     $lines = $this->getContext(file_get_contents($file), $message->getLine(), $this::ERROR_CONTEXT_LIMIT);
 
-                    $formattedText = [];
+                    $formattedText = array();
                     foreach ($lines as $no => $code) {
                         $formattedText[] = sprintf($this::ERROR_LINE_FORMAT, $no, wordwrap($code, $this::ERROR_LINE_WIDTH));
 
@@ -148,15 +148,18 @@ class TextFormatter implements ReportFormatterInterface
         return $result;
     }
 
-    protected function formatMemory($size, $precision = 2) {
-        $units = array('B','kB','MB','GB','TB','PB','EB','ZB','YB');
-        $step = 1024;
+    protected function formatMemory($size)
+    {
+        $units     = array('B','kB','MB','GB','TB','PB','EB','ZB','YB');
+        $precision = array(0, 0, 1, 2, 2, 3, 3, 4, 4);
+        $step      = 1024;
+
         $i = 0;
         while (($size / $step) >= 1) {
             $size = $size / $step;
             $i++;
         }
-        return round($size, [0,0,1,2,2,3,3,4,4][$i]) . $units[$i];
-    }
 
+        return round($size, $precision[$i]) . $units[$i];
+    }
 }
