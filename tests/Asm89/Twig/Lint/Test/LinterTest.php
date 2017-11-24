@@ -106,6 +106,14 @@ class LinterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @dataProvider dataDisallowCommentedCodeSniff
+     */
+    public function testDisallowCommentedCodeSniff($isFile, $filename, $sniff, $expects)
+    {
+        $this->checkGenericSniff($filename, $sniff, $expects);
+    }
+
+    /**
      * @dataProvider dataEnsureHashAllSniff
      */
     public function testEnsureHashAllSniff($isFile, $filename, $sniff, $expects)
@@ -262,6 +270,18 @@ class LinterTest extends \PHPUnit_Framework_TestCase
                 'Include tag is deprecated; use the include() function instead',
             )),
             array(true, 'Linter/include_no.twig', $sniff, array(
+            )),
+        );
+    }
+
+    public function dataDisallowCommentedCodeSniff()
+    {
+        $sniff = new \Asm89\Twig\Lint\Standards\Generic\Sniffs\DisallowCommentedCodeSniff();
+        return array(
+            array(true, 'Linter/comment_1.twig', $sniff, array(
+            )),
+            array(true, 'Linter/comment_2.twig', $sniff, array(
+                'Probable commented code found; keeping commented code is usually not advised',
             )),
         );
     }
