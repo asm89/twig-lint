@@ -111,8 +111,24 @@ EOF
         $severity   = $input->getOption('severity');
         $currentDir = $input->getOption('working-dir');
 
-        $loader        = new Loader(new FileLocator($currentDir));
-        $config        = new Config(array('workingDirectory' => $currentDir), $loader->load('twigcs.yml'));
+        // Load config files.
+        $globalLoader = new Loader(new FileLocator(getenv('HOME') . '/.twigcs'));
+        $loader       = new Loader(new FileLocator($currentDir));
+
+        $globalConfig = array();
+        try {
+            $globalConfig = $globalLoader->load('twigcs_global.yml');
+        } catch (\Exception $e) {
+            // The global config file may not exist but it's ok.
+        }
+
+        // Compute the final config object.
+        $config = new Config(
+            $globalConfig,
+            $loader->load('twigcs.yml'),
+            array('workingDirectory' => $currentDir)
+        );
+
         $twig          = new StubbedEnvironment(new \Twig_Loader_Array(), array('stub_tags' => $config->get('stub')));
         $linter        = new Linter($twig, new Tokenizer($twig));
         $factory       = new RulesetFactory();
