@@ -162,9 +162,9 @@ class LinterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider dataConfigYml1
+     * @dataProvider dataConfig1
      */
-    public function testConfigYml1($filename, $expectLoadingError, $expectCount = 0, $expectAddErrors = true, $expectAdded = 0)
+    public function testConfig1($filename, $expectLoadingError, $expectCount = 0, $expectAddErrors = true, $expectAdded = 0)
     {
         $loader = new Loader(new FileLocator(__DIR__ . '/Fixtures/config'));
         try {
@@ -200,9 +200,9 @@ class LinterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider dataConfigYml2
+     * @dataProvider dataConfig2
      */
-    public function testConfigYml2($configFilename, $filename, $expectSeverity)
+    public function testConfig2($configFilename, $filename, $expectSeverity)
     {
         $loader        = new Loader(new FileLocator($this->workingDirectory . '/config'));
         $config        = new Config(array('workingDirectory' => $this->workingDirectory . '/config'), $loader->load($configFilename));
@@ -213,6 +213,17 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         foreach ($messages as $message) {
             $this->assertEquals($expectSeverity, $message->getSeverity());
         }
+    }
+
+    /**
+     * @dataProvider dataConfig3
+     */
+    public function testConfig3($configArray)
+    {
+        $config  = new Config($configArray);
+        $ruleset = $this->rulesetFactory->createRulesetFromConfig($config);
+
+        $this->assertCount(1, $ruleset->getSniffs());
     }
 
     public function templateFixtures()
@@ -414,7 +425,7 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function dataConfigYml1()
+    public function dataConfig1()
     {
         return array(
             array('twigcs_0.yml', 'File "twigcs_0.yml" not found.'),
@@ -425,10 +436,24 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function dataConfigYml2()
+    public function dataConfig2()
     {
         return array(
             array('twigcs_1.yml', 'Linter/dump_function.twig', 10),
+        );
+    }
+
+    public function dataConfig3()
+    {
+        return array(
+            array(array(
+                'ruleset' => array(
+                    array('class' => '\Acme\Standards\TwigCS\Sniffs\DummySniff'),
+                ),
+                'standardPaths' => array(
+                    '\Acme\Standards\TwigCS' => array(__DIR__ . '/Fixtures/Standards/'),
+                ),
+            )),
         );
     }
 

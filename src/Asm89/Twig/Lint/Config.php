@@ -11,6 +11,7 @@
 
 namespace Asm89\Twig\Lint;
 
+use Aura\Autoload\Loader as Autoloader;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -29,6 +30,7 @@ class Config
         'exclude'          => array(),
         'pattern'          => '*.twig',
         'paths'            => array(),
+        'standardPaths'    => array(),
         'stub'             => array(),
         'workingDirectory' => '',
     );
@@ -41,6 +43,13 @@ class Config
     protected $config;
 
     /**
+     * Autoloader for sniffs.
+     *
+     * @var Autoloader\Loader
+     */
+    protected $autoloader;
+
+    /**
      * Constructor.
      */
     public function __construct()
@@ -50,6 +59,14 @@ class Config
         $this->config = $this::$defaultConfig;
         foreach ($args as $arg) {
             $this->config = array_merge($this->config, $arg);
+        }
+
+        $this->autoloader = new Autoloader();
+        $this->autoloader->register();
+
+        $standardPaths = $this->get('standardPaths');
+        if ($standardPaths) {
+            $this->autoloader->setPrefixes($standardPaths);
         }
     }
 
