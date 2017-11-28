@@ -1,7 +1,0 @@
-ruleset:
-  -
-    class: 'Asm89\Twig\Lint\Standards\Generic\Sniffs\DisallowDumpSniff'
-    options:
-      severity: 10
-  -
-    class: 'Asm89\Twig\Lint\Standards\Generic\Sniffs\EnsureWhitespaceExpressionSniff'
