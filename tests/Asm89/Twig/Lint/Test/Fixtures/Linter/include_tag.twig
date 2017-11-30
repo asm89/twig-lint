@@ -1,0 +1,8 @@
+{% include 'AcmeOyoBundle:Front:index.html.twig' with {
+    'x': 1,
+    'y': 2,
+    'z': false,
+} %}
+{% include 'AcmeOyoBundle:Front:index@legacy.html.twig' %}
+{% include ['@AcmeOyoBundle/Front/index.html.twig', 'AcmeOyoBundle/Front/index_legacy.html.twig'] %}
+{% include '@AcmeOyoBundle/Front/' ~ type.slug ~ '/index.html.twig' with {} only %}

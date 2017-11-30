@@ -1,0 +1,16 @@
+{% embed 'AcmeOyoBundle:Front:index.html.twig' with {
+    param1: 'AcmeOyoBundle:Front:index.html.twig'
+} %}
+{% endembed %}
+
+{% embed ['@AcmeOyoBundle/Front/index.html.twig', 'AcmeOyoBundle/Front/index_legacy.html.twig'] %}
+    {% block some_block %}
+        Oyo!
+    {% endblock some_block %}
+{% endembed %}
+
+{% embed 'AcmeOyoBundle/Front/index@legacy.html.twig' %}
+    {% block some_block %}
+        Oyo2!
+    {% endblock some_block %}
+{% endembed %}

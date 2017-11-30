@@ -1,0 +1,16 @@
+{% extends '@Some/base_template.twig' %}
+
+{% block body %}
+    {%   set x = 12 %}
+
+    {{  include('@Some', {x: 1 }) }}
+
+        {% if (x is sameas('12') or currentX is not defined) and true %}
+            {%- set currentX =
+                '123422340' -%}
+        {% endif %}
+
+
+    {# Hello #}
+    {{ 'oyo.x.y'|trans( {}, "front")        }}
+{% endblock body %}

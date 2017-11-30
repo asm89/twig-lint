@@ -1,0 +1,32 @@
+{% set settings = {
+    'website.index':        'https://website.com',
+    'client.brand_color':   '#fab615',
+    'keyName':              'some_key',
+} %}
+
+{% set deep = {
+    'lvl0': [
+        {
+            lvl1_x: 89,
+            lvl1_y: 45.5
+        },
+        {
+            (attribute(settings, 'keyName') ~ ''): 'some_value',
+            (someVar): 'andThenSome',
+        },
+        {
+            'lvl1_x': 120.12,
+            lvl1_y: 344.56,
+            'lvl2': {
+                lvl2_x: 150,
+                'lvl2_y': false,
+                'lvl3': {
+                    'lvl3_x': false,
+                    'lvl3_y': false,
+                    lvl3_z: true,
+                }
+            },
+            'lvl1_z': 'Oyoyo'
+        }
+    ]
+} %}

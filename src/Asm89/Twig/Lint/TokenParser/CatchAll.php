@@ -58,7 +58,12 @@ class CatchAll extends Twig_TokenParser
             $stream->expect(Twig_Token::BLOCK_END_TYPE);
         }
 
-        return null;
+        $attributes = array();
+        if ($token->getValue()) {
+            $attributes['name'] = $token->getValue();
+        }
+
+        return new \Twig_Node(array(), $attributes, $token->getLine(), $token->getValue() ?: null);
     }
 
     /**

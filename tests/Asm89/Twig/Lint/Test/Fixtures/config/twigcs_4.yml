@@ -1,0 +1,3 @@
+not_ruleset:
+  -
+    class: 'Asm89\Twig\Lint\Standards\Generic\Sniffs\DisallowDumpSniff'
