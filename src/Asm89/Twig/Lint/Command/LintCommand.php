@@ -57,6 +57,13 @@ class LintCommand extends Command
                     'List of tags that the lint command has to provide stub for',
                     array()
                 ),
+                new InputOption(
+                    'stub-test',
+                    '',
+                    InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+                    'List of tests that the lint command has to provide stub for',
+                    array()
+                ),
                 new InputOption('only-print-errors', '', InputOption::VALUE_NONE),
                 new InputOption('summary', '', InputOption::VALUE_NONE)
             ))
@@ -88,16 +95,18 @@ EOF
 
     protected function execute(InputInterface $input, CliOutputInterface $output)
     {
-        $template    = null;
-        $filename    = $input->getArgument('filename');
-        $exclude     = $input->getOption('exclude');
-        $stubTagList = $input->getOption('stub-tag');
-        $summary     = $input->getOption('summary');
-        $output      = $this->getOutput($output, $input->getOption('format'));
-        $twig        = new StubbedEnvironment(
+        $template      = null;
+        $filename      = $input->getArgument('filename');
+        $exclude       = $input->getOption('exclude');
+        $stubTagList   = $input->getOption('stub-tag');
+        $stubTestsList = $input->getOption('stub-test');
+        $summary       = $input->getOption('summary');
+        $output        = $this->getOutput($output, $input->getOption('format'));
+        $twig          = new StubbedEnvironment(
             new \Twig_Loader_Array(),
             array(
-                'stub_tags' => $stubTagList,
+                'stub_tags'  => $stubTagList,
+                'stub_tests' => $stubTestsList,
             )
         );
 

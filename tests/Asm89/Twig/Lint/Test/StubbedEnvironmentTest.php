@@ -26,7 +26,8 @@ class StubbedEnvironmentTest extends \PHPUnit_Framework_TestCase
         $this->env = new StubbedEnvironment(
             $this->getMockBuilder('Twig_LoaderInterface')->getMock(),
             array(
-                'stub_tags' => array('meh', 'render', 'some_other_block', 'stylesheets', 'trans'),
+                'stub_tags'  => array('meh', 'render', 'some_other_block', 'stylesheets', 'trans'),
+                'stub_tests' => array('created by', 'sometest', 'some_undefined_test', 'some_undefined_test_with_args'),
             )
         );
     }
