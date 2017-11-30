@@ -19,10 +19,10 @@ use Asm89\Twig\Lint\RulesetFactory;
 use Asm89\Twig\Lint\Sniffs\SniffInterface;
 use Asm89\Twig\Lint\StubbedEnvironment;
 use Asm89\Twig\Lint\Tokenizer\Tokenizer;
-
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\FileLocator;
 
-class LinterTest extends \PHPUnit_Framework_TestCase
+class LinterTest extends TestCase
 {
     private $env;
     private $lint;
@@ -35,7 +35,8 @@ class LinterTest extends \PHPUnit_Framework_TestCase
         $this->env = new StubbedEnvironment(
             $this->getMockBuilder('Twig_LoaderInterface')->getMock(),
             array(
-                'stub_tags' => array('dump', 'meh', 'render', 'some_other_block', 'stylesheets', 'trans'),
+                'stub_tags'  => array('dump', 'meh', 'render', 'some_other_block', 'stylesheets', 'trans'),
+                'stub_tests' => array('sometest'),
             )
         );
         $this->lint = new Linter($this->env, new Tokenizer($this->env));

@@ -13,9 +13,10 @@ namespace Asm89\Twig\Lint\Test;
 
 use Asm89\Twig\Lint\Tokenizer\Tokenizer;
 use Asm89\Twig\Lint\Preprocessor\Token;
+use PHPUnit\Framework\TestCase;
 use \Twig_Environment;
 
-class TokenizerTest extends \PHPUnit_Framework_TestCase
+class TokenizerTest extends TestCase
 {
     /**
      * @dataProvider templateFixtures

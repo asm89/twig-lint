@@ -5,3 +5,7 @@
 {% if foo is some_undefined_test_with_args(bar) %}
     {{ foo }}
 {% endif %}
+
+{% if foo is created by('me') %}
+    {{ foo }}
+{% endif %}
