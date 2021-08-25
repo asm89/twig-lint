@@ -38,7 +38,7 @@ Run `./bin/twig-lint lint <file>`.
 
 For the standalone executable, add the following to your `~/.vimrc` file:
 
-```
+```vim
 let g:syntastic_twig_twiglint_exec = 'php'
 let g:syntastic_twig_twiglint_exe = 'php /path/to/twig-lint.phar'
 ```
