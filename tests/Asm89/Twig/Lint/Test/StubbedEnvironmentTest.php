@@ -72,4 +72,13 @@ class StubbedEnvironmentTest extends TestCase
             array('mixed.twig'),
         );
     }
+
+    public function testLintFailures()
+    {
+        $file = __DIR__ . '/Fixtures/fail.twig';
+        $template = file_get_contents($file);
+        $this->expectException(\Twig\Error\SyntaxError::class);
+        $this->expectExceptionMessage(sprintf('Unexpected "}" in "%s" at line 1.', $file));
+        $this->env->parse($this->env->tokenize($template, $file));
+    }
 }
