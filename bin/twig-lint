@@ -14,5 +14,5 @@ require __DIR__.'/../src/bootstrap.php';
 
 use Asm89\Twig\Lint\Console\Application;
 
-$application = new Application('Twig lint', 'v1.0.1');
+$application = new Application('Twig lint', 'v1.0.3');
 $application->run();
