@@ -25,7 +25,7 @@ class StubbedEnvironmentTest extends TestCase
      */
     private $env;
 
-    public function setup()
+    public function setUp(): void
     {
         $this->env = new StubbedEnvironment();
     }
