@@ -1,15 +1,50 @@
-language: php
-
 sudo: false
 
-php:
-  - 5.3
-  - 5.4
-  - 5.5
-  - 5.6
-  - 7.0
-  - 7.1
+dist: trusty
 
-before_script: composer install
+cache:
+    directories:
+        - $HOME/.composer/cache/files
 
-script: phpunit
+env:
+    global:
+        - TEST_COMMAND="phpunit"
+
+matrix:
+    fast_finish: true
+    include:
+          # Minimum supported PHP and Symfony version
+        - php: 5.3
+          env: DEPENDENCIES="minimum"
+
+          # Test the latest stable release
+        - php: 7.1
+
+          # Test LTS versions
+        - php: 7.1
+          env: DEPENDENCIES="symfony/lts:v2"
+        - php: 7.1
+          env: DEPENDENCIES="symfony/lts:v3"
+
+          # Latest beta release
+        - php: 7.1
+          env: DEPENDENCIES="beta"
+
+    allow_failures:
+          # Latest beta is allowed to fail.
+        - php: 7.1
+          env: DEPENDENCIES="beta"
+
+before_install:
+    - if [ "$DEPENDENCIES" = "minimum" ]; then COMPOSER_FLAGS="--prefer-stable --prefer-lowest"; fi;
+    - if [ "$DEPENDENCIES" = "beta" ]; then composer config minimum-stability beta; fi;
+    - if [[ $DEPENDENCIES == *"/"* ]]; then composer require --no-update $DEPENDENCIES; fi;
+
+install:
+    # To be removed when this issue will be resolved: https://github.com/composer/composer/issues/5355
+    - if [[ "$COMPOSER_FLAGS" == *"--prefer-lowest"* ]]; then travis_retry composer update --prefer-dist --no-interaction --prefer-stable --quiet; fi
+    - travis_retry composer update ${COMPOSER_FLAGS} --prefer-dist --no-interaction
+
+script:
+    - $TEST_COMMAND
+
