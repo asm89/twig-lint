@@ -10,17 +10,7 @@ It can be useful to integrate in your ci setup or as the basis of editor plugins
 Installation / Usage
 --------------------
 
-### As standalone executable
-
-Download the [`twig-lint.phar`](https://asm89.github.io/d/twig-lint.phar) executable. Or as a global composer dependency:
-
-```bash
-composer global require "asm89/twig-lint" "@stable"
-```
-
-Run `php twig-lint.phar lint <file>` or `~/.composer/vendor/bin/twig-lint lint <file>`.
-
-### As a dev dependency
+### As a dev dependency (recommended)
 
 Add the following to your `composer.json`:
 
@@ -34,13 +24,23 @@ Add the following to your `composer.json`:
 
 Run `./bin/twig-lint lint <file>`.
 
+### As standalone executable
+
+Install as a global composer dependency:
+
+```bash
+composer global require "asm89/twig-lint" "@stable"
+```
+
+Run `~/.composer/vendor/bin/twig-lint lint <file>`.
+
 ### Vim and Syntastic configuration
 
 For the standalone executable, add the following to your `~/.vimrc` file:
 
 ```vim
 let g:syntastic_twig_twiglint_exec = 'php'
-let g:syntastic_twig_twiglint_exe = 'php /path/to/twig-lint.phar'
+let g:syntastic_twig_twiglint_exe = 'php /path/to/twig-lint'
 ```
 
 For the composer dependency, twig-lint must be in your `$PATH`, no further
